@@ -440,41 +440,106 @@
             }
         });
 
-        function throwBall(speedFactor) {
-            const ball = document.createElement('a-sphere');
-            ball.setAttribute('radius', '0.15');
-            ball.setAttribute('color', 'white');
+        // function throwBall(speedFactor) {
+        //     const ball = document.createElement('a-sphere');
+        //     ball.setAttribute('radius', '0.15');
+        //     ball.setAttribute('color', 'white');
             
-            // Calculate where the camera is looking in the WORLD
-            const direction = new THREE.Vector3(0, 0, -1);
-            cam.object3D.getWorldDirection(direction);
-            direction.multiplyScalar(-1); // Adjust for A-Frame's inverted Z
+        //     // Calculate where the camera is looking in the WORLD
+        //     const direction = new THREE.Vector3(0, 0, -1);
+        //     cam.object3D.getWorldDirection(direction);
+        //     direction.multiplyScalar(-1); // Adjust for A-Frame's inverted Z
 
-            const startPos = cam.object3D.getWorldPosition(new THREE.Vector3());
+        //     const startPos = cam.object3D.getWorldPosition(new THREE.Vector3());
             
-            ball.setAttribute('position', startPos);
-            scene.appendChild(ball);
+        //     ball.setAttribute('position', startPos);
+        //     scene.appendChild(ball);
 
-            // The ball travels 6 meters in the direction you are looking
-            const travelDist = 6; 
-            const endPos = {
-                x: startPos.x + (direction.x * travelDist),
-                y: startPos.y, // It falls toward the floor
-                z: startPos.z + (direction.z * travelDist)
-            };
+        //     // The ball travels 6 meters in the direction you are looking
+        //     const travelDist = 6; 
+        //     const endPos = {
+        //         x: startPos.x + (direction.x * travelDist),
+        //         y: startPos.y, // It falls toward the floor
+        //         z: startPos.z + (direction.z * travelDist)
+        //     };
 
-            // Animation for a clean arc
-            ball.setAttribute('animation', {
-                property: 'position',
-                to: `${endPos.x} ${endPos.y} ${endPos.z}`,
-                dur: 1000,
-                easing: 'easeOutQuad'
-            });
+        //     // Animation for a clean arc
+        //     ball.setAttribute('animation', {
+        //         property: 'position',
+        //         to: `${endPos.x} ${endPos.y} ${endPos.z}`,
+        //         dur: 1000,
+        //         easing: 'easeOutQuad'
+        //     });
 
-            setTimeout(() => {
-                if (ball.parentNode) ball.parentNode.removeChild(ball);
-            }, 1100);
-        }
+        //     setTimeout(() => {
+        //         if (ball.parentNode) ball.parentNode.removeChild(ball);
+        //     }, 1100);
+        // }
+
+        function throwBall() {
+    const ball = document.createElement('a-sphere');
+    ball.setAttribute('radius', '0.12');
+    ball.setAttribute('color', 'white');
+    
+    // 1. Get Camera's World Position and Aim Direction
+    const startPos = new THREE.Vector3();
+    cam.object3D.getWorldPosition(startPos);
+
+    const direction = new THREE.Vector3(0, 0, -1);
+    direction.applyQuaternion(cam.object3D.quaternion);
+
+    // 2. Spawn ball slightly in front of the camera so you see it leave the screen
+    ball.setAttribute('position', {
+        x: startPos.x + direction.x * 0.5,
+        y: startPos.y + direction.y * 0.5,
+        z: startPos.z + direction.z * 0.5
+    });
+
+    scene.appendChild(ball);
+
+    // 3. Define the landing spot (6 meters in the direction you are aiming)
+    const distance = 6;
+    const endPos = {
+        x: startPos.x + direction.x * distance,
+        y: -1.2, // This is "floor level" in your AR world
+        z: startPos.z + direction.z * distance
+    };
+
+    // 4. ANIMATION: Forward Movement (Linear)
+    ball.setAttribute('animation__pos', {
+        property: 'position',
+        to: `${endPos.x} ${endPos.y} ${endPos.z}`,
+        dur: 1200,
+        easing: 'linear'
+    });
+
+    // 5. ANIMATION: The "Arc" (Making it go UP then DOWN)
+    // We animate the 'y' coordinate separately to create a curve
+    const peakHeight = startPos.y + 1.5; // How high the ball "jumps"
+    
+    ball.setAttribute('animation__up', {
+        property: 'object3D.position.y',
+        from: startPos.y,
+        to: peakHeight,
+        dur: 400,
+        easing: 'easeOutQuad'
+    });
+
+    // After 400ms (peak), we start the fall
+    setTimeout(() => {
+        ball.setAttribute('animation__down', {
+            property: 'object3D.position.y',
+            to: endPos.y,
+            dur: 800,
+            easing: 'easeInQuad'
+        });
+    }, 400);
+
+    // Cleanup
+    setTimeout(() => {
+        if (ball.parentNode) ball.parentNode.removeChild(ball);
+    }, 1300);
+}
     </script>
 </body>
 </html>
