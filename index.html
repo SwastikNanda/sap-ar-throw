@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SAP AR Toss</title>
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+
+  <!-- AR.js -->
+  <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.4/aframe/build/aframe-ar.js"></script>
+
+  <!-- Game Logic -->
+  <script src="game.js"></script>
+
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #score {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      padding: 10px;
+      font-size: 18px;
+      z-index: 999;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="score">Score: 0</div>
+
+<a-scene embedded arjs>
+  
+  <!-- Camera -->
+  <a-entity id="camera" camera look-controls>
+    <!-- SAP Ball -->
+    <a-sphere id="sapBall"
+              radius="0.08"
+              position="0 -0.15 -0.4"
+              color="#0a6ed1">
+    </a-sphere>
+  </a-entity>
+
+  <!-- Basket -->
+  <a-cylinder id="basket"
+              position="0 0.5 -2"
+              radius="0.3"
+              height="0.5"
+              color="#333">
+  </a-cylinder>
+
+</a-scene>
+
+</body>
+</html>
