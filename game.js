@@ -246,12 +246,15 @@ const velocity = new THREE.Vector3();
 const gravity = 9.8;
 const clock = new THREE.Clock();
 
+const sceneEl = document.querySelector("#scene");
 const cam = document.querySelector("#camera");
 const ball = document.querySelector("#ball");
 const basket = document.querySelector("#basket");
 
-/* ---------- Spawn Ball Near Camera ---------- */
-resetBall();
+/* 🚨 WAIT FOR SCENE TO LOAD */
+sceneEl.addEventListener("loaded", () => {
+  resetBall();   // ✅ NOW camera exists
+});
 
 /* ---------- Swipe Controls ---------- */
 document.addEventListener("touchstart", e => {

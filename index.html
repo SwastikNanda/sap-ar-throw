@@ -85,7 +85,7 @@
       width: 100vw;
       height: 100vh;
       z-index: 1;
-      pointer-events: none;
+      pointer-events: auto; /* ✅ IMPORTANT */
     }
 
     #score {
@@ -115,17 +115,17 @@
 <body>
 
 <div id="score">Score: 0</div>
-<div id="hint">Swipe up to throw SAP ball</div>
+<div id="hint">Swipe up to throw</div>
 
 <video id="cam" autoplay playsinline muted></video>
 
-<a-scene embedded>
+<a-scene embedded id="scene">
   <a-entity id="camera" camera position="0 0 0"></a-entity>
 
-  <!-- Basket -->
+  <!-- Basket (slightly forward so it feels 3D) -->
   <a-cylinder
     id="basket"
-    position="0 -0.2 -3"
+    position="0 -0.3 -2.5"
     radius="0.3"
     height="0.5"
     color="#333">
@@ -135,7 +135,7 @@
   <a-sphere
     id="ball"
     radius="0.08"
-    color="#0a6ed1"
+    color="red"
     ball-motion>
   </a-sphere>
 </a-scene>
