@@ -59,14 +59,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SAP AR Toss</title>
+  <title>Camera + 3D Test</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="game.js"></script>
 
   <style>
-    body { margin: 0; overflow: hidden; }
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
 
     video {
       position: fixed;
@@ -75,52 +77,59 @@
       width: 100vw;
       height: 100vh;
       object-fit: cover;
-      z-index: -1;
+      z-index: 0;
     }
 
-    #score {
+    a-scene {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    #msg {
       position: fixed;
       top: 10px;
-      left: 10px;
+      left: 50%;
+      transform: translateX(-50%);
       background: rgba(0,0,0,0.6);
       color: white;
-      padding: 10px;
-      z-index: 999;
+      padding: 8px 12px;
+      z-index: 2;
     }
   </style>
 </head>
 
 <body>
 
+<div id="msg">If you see a blue cube, rendering works</div>
+
 <video id="cam" autoplay playsinline muted></video>
 
-<div id="score">Score: 0</div>
+<a-scene embedded>
+  <a-entity camera position="0 0 0"></a-entity>
 
-<a-scene embedded vr-mode-ui="enabled:false">
-  <a-entity id="camera" camera></a-entity>
-
-  <!-- Basket -->
-  <a-cylinder id="basket"
-              position="0 0 -3"
-              radius="0.3"
-              height="0.5"
-              color="#333">
-  </a-cylinder>
-
-  <!-- SAP Ball -->
-  <a-sphere id="ball"
-            radius="0.08"
-            color="#0a6ed1"
-            ball-motion>
-  </a-sphere>
+  <!-- TEST OBJECT -->
+  <a-box
+    position="0 0 -2"
+    depth="0.5"
+    height="0.5"
+    width="0.5"
+    color="blue">
+  </a-box>
 </a-scene>
 
 <script>
-navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-  .then(stream => {
-    document.getElementById("cam").srcObject = stream;
-  });
+navigator.mediaDevices.getUserMedia({
+  video: { facingMode: "environment" }
+}).then(stream => {
+  document.getElementById("cam").srcObject = stream;
+});
 </script>
 
 </body>
 </html>
+
