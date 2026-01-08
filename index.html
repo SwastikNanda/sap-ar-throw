@@ -3,13 +3,14 @@
 <head>
   <title>SAP AR Toss</title>
 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 
-  <!-- AR.js -->
+  <!-- AR.js (camera-enabled) -->
   <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.4/aframe/build/aframe-ar.js"></script>
 
-  <!-- Game Logic -->
   <script src="game.js"></script>
 
   <style>
@@ -21,7 +22,6 @@
       background: rgba(0,0,0,0.6);
       color: white;
       padding: 10px;
-      font-size: 18px;
       z-index: 999;
     }
   </style>
@@ -31,11 +31,14 @@
 
 <div id="score">Score: 0</div>
 
-<a-scene embedded arjs>
-  
+<a-scene
+  vr-mode-ui="enabled: false"
+  renderer="logarithmicDepthBuffer: true;"
+  arjs="sourceType: webcam; debugUIEnabled: false;"
+>
+
   <!-- Camera -->
   <a-entity id="camera" camera look-controls>
-    <!-- SAP Ball -->
     <a-sphere id="sapBall"
               radius="0.08"
               position="0 -0.15 -0.4"
