@@ -3,14 +3,10 @@
 <head>
   <title>SAP AR Toss</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-
-  <!-- AR.js (camera-enabled) -->
   <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.4/aframe/build/aframe-ar.js"></script>
-
   <script src="game.js"></script>
 
   <style>
@@ -19,7 +15,7 @@
       position: fixed;
       top: 10px;
       left: 10px;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.7);
       color: white;
       padding: 10px;
       z-index: 999;
@@ -33,26 +29,28 @@
 
 <a-scene
   vr-mode-ui="enabled: false"
-  renderer="logarithmicDepthBuffer: true;"
   arjs="sourceType: webcam; debugUIEnabled: false;"
 >
 
-  <!-- Camera -->
-  <a-entity id="camera" camera look-controls>
+  <a-marker preset="hiro">
+
+    <a-cylinder id="basket"
+                position="0 0.25 0"
+                radius="0.3"
+                height="0.5"
+                color="#333">
+    </a-cylinder>
+
     <a-sphere id="sapBall"
               radius="0.08"
-              position="0 -0.15 -0.4"
-              color="#0a6ed1">
+              position="0 0.6 0.5"
+              color="#0a6ed1"
+              ball-motion>
     </a-sphere>
-  </a-entity>
 
-  <!-- Basket -->
-  <a-cylinder id="basket"
-              position="0 0.5 -2"
-              radius="0.3"
-              height="0.5"
-              color="#333">
-  </a-cylinder>
+  </a-marker>
+
+  <a-entity camera></a-entity>
 
 </a-scene>
 
