@@ -60,83 +60,66 @@
 <html>
 <head>
   <title>SAP AR Toss</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <script src="game.js"></script>
 
   <style>
     body { margin: 0; overflow: hidden; }
 
-    #overlay {
+    video {
       position: fixed;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
-      background: black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      color: white;
-      flex-direction: column;
-      font-family: Arial;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -1;
     }
 
-    button {
-      padding: 14px 20px;
-      font-size: 16px;
-      background: #0a6ed1;
+    #score {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.6);
       color: white;
-      border: none;
-      border-radius: 6px;
+      padding: 10px;
+      z-index: 999;
     }
   </style>
 </head>
 
 <body>
 
-<!-- iOS START OVERLAY -->
-<div id="overlay">
-  <p>Tap to start SAP AR Toss</p>
-  <button onclick="startAR()">Start AR</button>
-</div>
+<video id="cam" autoplay playsinline muted></video>
 
-<a-scene
-  embedded
-  vr-mode-ui="enabled: false"
-  renderer="logarithmicDepthBuffer: true;"
-  arjs="
-    sourceType: webcam;
-    videoTexture: true;
-    debugUIEnabled: false;
-  "
->
+<div id="score">Score: 0</div>
 
-  <!-- MARKER -->
-  <a-marker preset="hiro">
-    <a-cylinder position="0 0.25 0" radius="0.3" height="0.5" color="#333"></a-cylinder>
-    <a-sphere position="0 0.6 0.5" radius="0.08" color="#0a6ed1"></a-sphere>
-  </a-marker>
+<a-scene embedded vr-mode-ui="enabled:false">
+  <a-entity id="camera" camera></a-entity>
 
-  <!-- CAMERA -->
-  <a-entity camera look-controls></a-entity>
+  <!-- Basket -->
+  <a-cylinder id="basket"
+              position="0 0 -3"
+              radius="0.3"
+              height="0.5"
+              color="#333">
+  </a-cylinder>
 
+  <!-- SAP Ball -->
+  <a-sphere id="ball"
+            radius="0.08"
+            color="#0a6ed1"
+            ball-motion>
+  </a-sphere>
 </a-scene>
 
 <script>
-function startAR() {
-  document.getElementById("overlay").style.display = "none";
-
-  // Force video play (iOS requirement)
-  const video = document.querySelector("video");
-  if (video) {
-    video.setAttribute("playsinline", "");
-    video.muted = true;
-    video.play();
-  }
-}
+navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+  .then(stream => {
+    document.getElementById("cam").srcObject = stream;
+  });
 </script>
 
 </body>

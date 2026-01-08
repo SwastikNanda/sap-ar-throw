@@ -153,86 +153,160 @@
 // }
 
 
+// let startY;
+// let isThrown = false;
+// let score = 0;
+
+// const velocity = new THREE.Vector3();
+// const gravity = 9.8;
+// const clock = new THREE.Clock();
+
+// const cameraEl = document.getElementById("camera");
+// const ballEl = document.getElementById("sapBall");
+// const basketEl = document.getElementById("basket");
+
+// /* ---------- Swipe Throw ---------- */
+
+// document.addEventListener("touchstart", e => {
+//   if (isThrown) return;
+//   startY = e.touches[0].clientY;
+// });
+
+// document.addEventListener("touchend", e => {
+//   if (isThrown) return;
+
+//   const endY = e.changedTouches[0].clientY;
+//   const swipe = startY - endY;
+
+//   if (swipe < 30) return;
+
+//   throwBall(Math.min(swipe / 40, 8));
+// });
+
+// function throwBall(power) {
+//   isThrown = true;
+
+//   const dir = new THREE.Vector3();
+//   cameraEl.object3D.getWorldDirection(dir);
+
+//   velocity.copy(dir.multiplyScalar(power));
+//   velocity.y += power / 2;
+// }
+
+// /* ---------- Physics ---------- */
+
+// AFRAME.registerComponent("ball-motion", {
+//   tick: function () {
+//     if (!isThrown) return;
+
+//     const delta = clock.getDelta();
+//     velocity.y -= gravity * delta;
+
+//     ballEl.object3D.position.add(
+//       velocity.clone().multiplyScalar(delta)
+//     );
+
+//     checkHit();
+//   }
+// });
+
+// /* ---------- Collision ---------- */
+
+// function checkHit() {
+//   const bPos = basketEl.object3D.getWorldPosition(new THREE.Vector3());
+//   const ballPos = ballEl.object3D.position;
+
+//   if (ballPos.distanceTo(bPos) < 0.3) {
+//     score++;
+//     document.getElementById("score").innerText = `Score: ${score}`;
+//     resetBall();
+//   }
+// }
+
+// /* ---------- Reset ---------- */
+
+// function resetBall() {
+//   isThrown = false;
+//   velocity.set(0, 0, 0);
+
+//   const dir = new THREE.Vector3();
+//   cameraEl.object3D.getWorldDirection(dir);
+
+//   ballEl.object3D.position.copy(
+//     cameraEl.object3D.position.clone().add(dir.multiplyScalar(0.5))
+//   );
+// }
+
+
 let startY;
-let isThrown = false;
+let thrown = false;
 let score = 0;
 
 const velocity = new THREE.Vector3();
 const gravity = 9.8;
 const clock = new THREE.Clock();
 
-const cameraEl = document.getElementById("camera");
-const ballEl = document.getElementById("sapBall");
-const basketEl = document.getElementById("basket");
-
-/* ---------- Swipe Throw ---------- */
+const cam = document.querySelector("#camera");
+const ball = document.querySelector("#ball");
+const basket = document.querySelector("#basket");
 
 document.addEventListener("touchstart", e => {
-  if (isThrown) return;
+  if (thrown) return;
   startY = e.touches[0].clientY;
 });
 
 document.addEventListener("touchend", e => {
-  if (isThrown) return;
-
-  const endY = e.changedTouches[0].clientY;
-  const swipe = startY - endY;
-
+  if (thrown) return;
+  const swipe = startY - e.changedTouches[0].clientY;
   if (swipe < 30) return;
 
   throwBall(Math.min(swipe / 40, 8));
 });
 
 function throwBall(power) {
-  isThrown = true;
+  thrown = true;
 
   const dir = new THREE.Vector3();
-  cameraEl.object3D.getWorldDirection(dir);
+  cam.object3D.getWorldDirection(dir);
 
   velocity.copy(dir.multiplyScalar(power));
   velocity.y += power / 2;
 }
 
-/* ---------- Physics ---------- */
-
 AFRAME.registerComponent("ball-motion", {
-  tick: function () {
-    if (!isThrown) return;
+  tick() {
+    if (!thrown) return;
 
-    const delta = clock.getDelta();
-    velocity.y -= gravity * delta;
+    const dt = clock.getDelta();
+    velocity.y -= gravity * dt;
 
-    ballEl.object3D.position.add(
-      velocity.clone().multiplyScalar(delta)
+    ball.object3D.position.add(
+      velocity.clone().multiplyScalar(dt)
     );
 
     checkHit();
   }
 });
 
-/* ---------- Collision ---------- */
-
 function checkHit() {
-  const bPos = basketEl.object3D.getWorldPosition(new THREE.Vector3());
-  const ballPos = ballEl.object3D.position;
+  const bp = basket.object3D.position;
+  const p = ball.object3D.position;
 
-  if (ballPos.distanceTo(bPos) < 0.3) {
+  if (p.distanceTo(bp) < 0.35) {
     score++;
     document.getElementById("score").innerText = `Score: ${score}`;
     resetBall();
   }
 }
 
-/* ---------- Reset ---------- */
-
 function resetBall() {
-  isThrown = false;
+  thrown = false;
   velocity.set(0, 0, 0);
 
   const dir = new THREE.Vector3();
-  cameraEl.object3D.getWorldDirection(dir);
+  cam.object3D.getWorldDirection(dir);
 
-  ballEl.object3D.position.copy(
-    cameraEl.object3D.position.clone().add(dir.multiplyScalar(0.5))
+  ball.object3D.position.copy(
+    cam.object3D.position.clone().add(dir.multiplyScalar(0.6))
   );
 }
