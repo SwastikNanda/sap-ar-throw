@@ -250,6 +250,10 @@ const cam = document.querySelector("#camera");
 const ball = document.querySelector("#ball");
 const basket = document.querySelector("#basket");
 
+/* ---------- Spawn Ball Near Camera ---------- */
+resetBall();
+
+/* ---------- Swipe Controls ---------- */
 document.addEventListener("touchstart", e => {
   if (thrown) return;
   startY = e.touches[0].clientY;
@@ -257,12 +261,14 @@ document.addEventListener("touchstart", e => {
 
 document.addEventListener("touchend", e => {
   if (thrown) return;
+
   const swipe = startY - e.changedTouches[0].clientY;
   if (swipe < 30) return;
 
   throwBall(Math.min(swipe / 40, 8));
 });
 
+/* ---------- Throw ---------- */
 function throwBall(power) {
   thrown = true;
 
@@ -273,6 +279,7 @@ function throwBall(power) {
   velocity.y += power / 2;
 }
 
+/* ---------- Physics ---------- */
 AFRAME.registerComponent("ball-motion", {
   tick() {
     if (!thrown) return;
@@ -288,6 +295,7 @@ AFRAME.registerComponent("ball-motion", {
   }
 });
 
+/* ---------- Collision ---------- */
 function checkHit() {
   const bp = basket.object3D.position;
   const p = ball.object3D.position;
@@ -299,6 +307,7 @@ function checkHit() {
   }
 }
 
+/* ---------- Reset ---------- */
 function resetBall() {
   thrown = false;
   velocity.set(0, 0, 0);

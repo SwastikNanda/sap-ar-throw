@@ -59,16 +59,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Camera + 3D Test</title>
+  <title>SAP AR Toss</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="game.js"></script>
 
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-    }
+    body { margin: 0; overflow: hidden; }
 
     video {
       position: fixed;
@@ -90,14 +88,25 @@
       pointer-events: none;
     }
 
-    #msg {
+    #score {
       position: fixed;
       top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px;
+      z-index: 2;
+    }
+
+    #hint {
+      position: fixed;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,0,0,0.6);
       color: white;
-      padding: 8px 12px;
+      padding: 8px 14px;
+      border-radius: 6px;
       z-index: 2;
     }
   </style>
@@ -105,21 +114,30 @@
 
 <body>
 
-<div id="msg">If you see a blue cube, rendering works</div>
+<div id="score">Score: 0</div>
+<div id="hint">Swipe up to throw SAP ball</div>
 
 <video id="cam" autoplay playsinline muted></video>
 
 <a-scene embedded>
-  <a-entity camera position="0 0 0"></a-entity>
+  <a-entity id="camera" camera position="0 0 0"></a-entity>
 
-  <!-- TEST OBJECT -->
-  <a-box
-    position="0 0 -2"
-    depth="0.5"
+  <!-- Basket -->
+  <a-cylinder
+    id="basket"
+    position="0 -0.2 -3"
+    radius="0.3"
     height="0.5"
-    width="0.5"
-    color="blue">
-  </a-box>
+    color="#333">
+  </a-cylinder>
+
+  <!-- SAP Ball -->
+  <a-sphere
+    id="ball"
+    radius="0.08"
+    color="#0a6ed1"
+    ball-motion>
+  </a-sphere>
 </a-scene>
 
 <script>
@@ -132,4 +150,3 @@ navigator.mediaDevices.getUserMedia({
 
 </body>
 </html>
-
