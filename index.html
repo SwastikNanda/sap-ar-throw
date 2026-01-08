@@ -115,57 +115,111 @@
     </a-scene>
 
     <script>
-        function initGame() {
-            document.getElementById('ar-ui').style.display = 'none';
+        // function initGame() {
+        //     document.getElementById('ar-ui').style.display = 'none';
             
-            // Required for iOS to unlock sensors
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission();
-            }
-        }
+        //     // Required for iOS to unlock sensors
+        //     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        //         DeviceOrientationEvent.requestPermission();
+        //     }
+        // }
 
-        // SWIPE LOGIC
-        let startY, startTime;
-        window.addEventListener('touchstart', (e) => {
-            startY = e.touches[0].clientY;
-            startTime = Date.now();
-        });
+        // // SWIPE LOGIC
+        // let startY, startTime;
+        // window.addEventListener('touchstart', (e) => {
+        //     startY = e.touches[0].clientY;
+        //     startTime = Date.now();
+        // });
 
-        window.addEventListener('touchend', (e) => {
-            let endY = e.changedTouches[0].clientY;
-            let duration = Date.now() - startTime;
-            let distance = startY - endY;
+        // window.addEventListener('touchend', (e) => {
+        //     let endY = e.changedTouches[0].clientY;
+        //     let duration = Date.now() - startTime;
+        //     let distance = startY - endY;
 
-            if (distance > 50 && duration < 300) {
-                let speed = (distance / duration) * 10;
-                throwPaper(speed);
-            }
-        });
+        //     if (distance > 50 && duration < 300) {
+        //         let speed = (distance / duration) * 10;
+        //         throwPaper(speed);
+        //     }
+        // });
 
-        function throwPaper(speed) {
-            const scene = document.querySelector('a-scene');
-            const ball = document.createElement('a-sphere');
+        // function throwPaper(speed) {
+        //     const scene = document.querySelector('a-scene');
+        //     const ball = document.createElement('a-sphere');
             
-            // Get camera direction
-            const camera = document.querySelector('[camera]');
-            const position = camera.object3D.position;
+        //     // Get camera direction
+        //     const camera = document.querySelector('[camera]');
+        //     const position = camera.object3D.position;
             
-            ball.setAttribute('radius', '0.1');
-            ball.setAttribute('color', 'white');
-            ball.setAttribute('position', `${position.x} ${position.y - 0.2} ${position.z - 0.5}`);
-            ball.setAttribute('dynamic-body', 'mass: 0.5');
+        //     ball.setAttribute('radius', '0.018');
+        //     ball.setAttribute('color', 'white');
+        //     ball.setAttribute('position', `${position.x} ${position.y - 0.2} ${position.z - 0.5}`);
+        //     ball.setAttribute('dynamic-body', 'mass: 0.2; linearDamping: 0.01; angularDamping: 0.01;');
             
-            scene.appendChild(ball);
+        //     scene.appendChild(ball);
 
-            ball.addEventListener('body-loaded', () => {
-                // Direction: Forward (-z) and Up (+y)
-                const impulse = new CANNON.Vec3(0, speed * 0.5, -speed);
-                ball.body.applyImpulse(impulse, new CANNON.Vec3(0, 0, 0));
+        //     ball.addEventListener('body-loaded', () => {
+        //         // Direction: Forward (-z) and Up (+y)
+        //         const impulse = new CANNON.Vec3(0, speed * 0.5, -speed);
+        //         ball.body.applyImpulse(impulse, new CANNON.Vec3(0, 0, 0));
                 
-                // Cleanup
-                setTimeout(() => { if(ball.parentNode) ball.parentNode.removeChild(ball); }, 4000);
-            });
+        //         // Cleanup
+        //         setTimeout(() => { if(ball.parentNode) ball.parentNode.removeChild(ball); }, 4000);
+        //     });
+        // }
+
+        let startY, startTime;
+
+    // 1. Capture the start of the flick
+    window.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        startTime = Date.now();
+    });
+
+    // 2. Capture the end and calculate the "Flick"
+    window.addEventListener('touchend', (e) => {
+        const endY = e.changedTouches[0].clientY;
+        const duration = Date.now() - startTime;
+        const distance = startY - endY; // Total vertical movement
+
+        // Minimum distance to count as a "throw"
+        if (distance > 30 && duration < 500) {
+            // Calculate speed: pixels per millisecond
+            // We multiply by a 'boost' factor to make it reach 3 meters
+            const velocity = (distance / duration) * 12; 
+            throwPaper(velocity);
         }
+    });
+
+    function throwPaper(speed) {
+        const scene = document.querySelector('a-scene');
+        const ball = document.createElement('a-sphere');
+        
+        // Setup ball visuals
+        ball.setAttribute('radius', '0.12');
+        ball.setAttribute('color', '#ffffff');
+        // Spawn it slightly below the center of your screen
+        ball.setAttribute('position', '0 0.5 -0.5'); 
+        
+        // Attach the Physics body
+        ball.setAttribute('dynamic-body', 'mass: 0.5; linearDamping: 0.05');
+        
+        scene.appendChild(ball);
+
+        // The Magic: Wait for the physics engine to 'wake up' the ball
+        ball.addEventListener('body-loaded', () => {
+            // impulse(x, y, z)
+            // y = upward lift, z = forward distance
+            const impulse = new CANNON.Vec3(0, speed * 0.4, -speed);
+            const worldPoint = new CANNON.Vec3(0, 0, 0);
+            
+            ball.body.applyImpulse(impulse, worldPoint);
+            
+            // Clean up old balls after 3 seconds to keep the game fast
+            setTimeout(() => {
+                if(ball.parentNode) ball.parentNode.removeChild(ball);
+            }, 3000);
+        });
+    }
     </script>
 </body>
 </html>
