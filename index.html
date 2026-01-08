@@ -59,115 +59,94 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>WebAR Paper Toss - Final Fix</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>WebAR Paper Toss</title>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-world-aframe.prod.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.2/dist/aframe-physics-system.min.js"></script>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; font-family: sans-serif; }
-        #overlay {
+        #ui-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 1000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;
+            background: rgba(0,0,0,0.8); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         button {
-            padding: 15px 30px; font-size: 1.2rem; background: #007bff;
-            color: white; border: none; border-radius: 8px; cursor: pointer;
-        }
-        #ui-guide {
-            position: absolute; top: 10px; width: 100%; text-align: center;
-            color: white; z-index: 10; pointer-events: none; text-shadow: 2px 2px 4px #000;
+            padding: 20px 40px; font-size: 1.5rem; background: #FF5722;
+            color: white; border: none; border-radius: 10px;
         }
     </style>
 </head>
-<body>
 
-    <div id="overlay">
-        <h1>Paper Toss AR</h1>
-        <p>Find a flat floor & swipe up to throw</p>
-        <button id="startBtn">START GAME</button>
+<body style="margin: 0; overflow: hidden;">
+
+    <div id="ui-overlay">
+        <button onclick="startAR()">ACTIVATE CAMERA</button>
+        <p style="color:white; margin-top:20px;">Use Safari (iOS) or Chrome (Android)</p>
     </div>
 
-    <div id="ui-guide">Swipe Up Fast!</div>
-
     <a-scene 
-        mindar-world="autoStart: false;" 
         embedded 
+        arjs="sourceType: webcam; debugUIEnabled: false;" 
         physics="gravity: -9.8; debug: false">
         
-        <a-assets>
-            <a-asset-item id="basketModel" src="https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/trash-can/model.gltf"></a-asset-item>
-        </a-assets>
+        <a-camera gps-camera rotation-reader></a-camera>
 
-        <a-camera position="0 1.2 0" look-controls="enabled: false"></a-camera>
-
-        <a-entity id="target" position="0 0 -3">
-            <a-entity gltf-model="#basketModel" scale="0.5 0.5 0.5" static-body></a-entity>
-            <a-cylinder radius="0.2" height="0.5" position="0 0.2 0" visible="false" static-body></a-cylinder>
+        <a-entity id="basket" position="0 0 -5">
+            <a-cylinder color="red" height="1" radius="0.5" open-ended="true" side="double" static-body></a-cylinder>
+            <a-circle position="0 -0.4 0" rotation="-90 0 0" radius="0.5" static-body color="black"></a-circle>
         </a-entity>
 
-        <a-plane rotation="-90 0 0" width="100" height="100" static-body visible="false"></a-plane>
-
-        <a-light type="ambient" intensity="0.8"></a-light>
-        <a-light type="directional" position="1 2 1" intensity="0.5"></a-light>
+        <a-light type="ambient" intensity="1"></a-light>
     </a-scene>
 
     <script>
-        const sceneEl = document.querySelector('a-scene');
-        const startBtn = document.querySelector('#startBtn');
-        const overlay = document.querySelector('#overlay');
+        function startAR() {
+            // Hide UI
+            document.getElementById('ui-overlay').style.display = 'none';
+            
+            // Requesting Motion/Orientation (Required for iOS Safari)
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response == 'granted') {
+                            console.log("Motion granted");
+                        }
+                    })
+                    .catch(console.error);
+            }
+        }
 
-        // 1. Initialize AR on Button Click (iOS/Android requirement)
-        startBtn.addEventListener('click', () => {
-            overlay.style.display = 'none';
-            sceneEl.systems['mindar-world-system'].start();
+        // Swipe Logic
+        let startY, startTime;
+        window.addEventListener('touchstart', e => {
+            startY = e.touches[0].clientY;
+            startTime = Date.now();
         });
 
-        // 2. Swipe Logic
-        let touchStartY = 0;
-        let touchStartTime = 0;
+        window.addEventListener('touchend', e => {
+            let endY = e.changedTouches[0].clientY;
+            let duration = Date.now() - startTime;
+            let dist = startY - endY;
 
-        window.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
-            touchStartTime = Date.now();
-        });
-
-        window.addEventListener('touchend', (e) => {
-            const touchEndY = e.changedTouches[0].clientY;
-            const duration = Date.now() - touchStartTime;
-            const distance = touchStartY - touchEndY; // Positive is UP
-
-            if (distance > 50 && duration < 300) {
-                // Calculate power based on swipe speed
-                const power = Math.min(distance / duration * 10, 20); 
-                throwPaper(power);
+            if (dist > 50) {
+                throwBall(dist / duration);
             }
         });
 
-        function throwPaper(power) {
+        function throwBall(speed) {
             const ball = document.createElement('a-sphere');
-            ball.setAttribute('radius', '0.08');
-            ball.setAttribute('color', '#eee');
-            ball.setAttribute('roughness', '1');
+            ball.setAttribute('radius', '0.15');
+            ball.setAttribute('position', '0 1 -1');
+            ball.setAttribute('dynamic-body', 'mass: 1');
+            ball.setAttribute('color', 'white');
             
-            // Position ball at bottom of screen
-            ball.setAttribute('position', '0 0.5 -0.5');
-            ball.setAttribute('dynamic-body', 'mass: 0.5');
-            
-            sceneEl.appendChild(ball);
+            document.querySelector('a-scene').appendChild(ball);
 
             ball.addEventListener('body-loaded', () => {
-                // Push ball: Forward (-z) and Up (+y)
-                const impulse = new CANNON.Vec3(0, power * 0.5, -power);
-                const pos = new CANNON.Vec3(0, 0, 0);
-                ball.body.applyImpulse(impulse, pos);
-
-                // Auto-cleanup to keep performance high
-                setTimeout(() => {
-                    if(ball.parentNode) ball.parentNode.removeChild(ball);
-                }, 4000);
+                const force = speed * 15;
+                const impulse = new CANNON.Vec3(0, force * 0.4, -force);
+                ball.body.applyImpulse(impulse, new CANNON.Vec3(0, 0, 0));
             });
         }
     </script>
