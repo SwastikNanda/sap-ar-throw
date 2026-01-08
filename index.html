@@ -58,95 +58,101 @@
 </html> -->
 <!DOCTYPE html>
 <html>
-<head>
-  <title>SAP AR Toss</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WebAR Paper Toss</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-world-aframe.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.2/dist/aframe-physics-system.min.js"></script>
 
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="game.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; }
+      #ui {
+        position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+        color: white; font-family: sans-serif; text-align: center; z-index: 10;
+        pointer-events: none; text-shadow: 0 0 5px black;
+      }
+    </style>
+  </head>
 
-  <style>
-    body { margin: 0; overflow: hidden; }
+  <body>
+    <div id="ui">
+      <p>Swipe Up Fast to Throw!</p>
+    </div>
 
-    video {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      z-index: 0;
-    }
+    <a-scene 
+      mindar-world="autoStart: true" 
+      embedded 
+      physics="debug: false; gravity: -9.8"
+      renderer="colorManagement: true; exposure: 1.5;">
+      
+      <a-assets>
+        <a-asset-item id="basketModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.2/examples/world-tracking/assets/models/music_band/scene.gltf"></a-asset-item>
+      </a-assets>
 
-    a-scene {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 1;
-      pointer-events: auto; /* ✅ IMPORTANT */
-    }
+      <a-camera position="0 1.2 0" raycaster="objects: .ground"></a-camera>
 
-    #score {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      padding: 10px;
-      z-index: 2;
-    }
+      <a-entity id="basket-container" position="0 0 -3">
+        <a-cylinder color="red" height="0.5" radius="0.3" open-ended="true" side="double" static-body></a-cylinder>
+        <a-circle color="black" rotation="-90 0 0" radius="0.3" position="0 -0.2 0" static-body></a-circle>
+      </a-entity>
 
-    #hint {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.6);
-      color: white;
-      padding: 8px 14px;
-      border-radius: 6px;
-      z-index: 2;
-    }
-  </style>
-</head>
+      <a-plane class="ground" rotation="-90 0 0" width="100" height="100" visible="false" static-body></a-plane>
 
-<body>
+      <a-light type="ambient" intensity="0.7"></a-light>
+      <a-light type="directional" position="1 2 1"></a-light>
+    </a-scene>
 
-<div id="score">Score: 0</div>
-<div id="hint">Swipe up to throw</div>
+    <script>
+      let startX, startY, startTime;
+      const sceneEl = document.querySelector('a-scene');
 
-<video id="cam" autoplay playsinline muted></video>
+      // Detect "Swipe" on the screen
+      window.addEventListener('mousedown', (e) => {
+        startX = e.clientX;
+        startY = e.clientY;
+        startTime = Date.now();
+      });
 
-<a-scene embedded id="scene">
-  <a-entity id="camera" camera position="0 0 0"></a-entity>
+      window.addEventListener('mouseup', (e) => {
+        const endX = e.clientX;
+        const endY = e.clientY;
+        const duration = Date.now() - startTime;
 
-  <!-- Basket (slightly forward so it feels 3D) -->
-  <a-cylinder
-    id="basket"
-    position="0 -0.3 -2.5"
-    radius="0.3"
-    height="0.5"
-    color="#333">
-  </a-cylinder>
+        // Calculate swipe strength
+        const diffX = (endX - startX) / window.innerWidth;
+        const diffY = (startY - endY) / window.innerHeight; // Positive = UP
 
-  <!-- SAP Ball -->
-  <a-sphere
-    id="ball"
-    radius="0.08"
-    color="red"
-    ball-motion>
-  </a-sphere>
-</a-scene>
+        if (diffY > 0.1) { // Only throw if swiped up
+          throwBall(diffX, diffY, duration);
+        }
+      });
 
-<script>
-navigator.mediaDevices.getUserMedia({
-  video: { facingMode: "environment" }
-}).then(stream => {
-  document.getElementById("cam").srcObject = stream;
-});
-</script>
+      function throwBall(xDir, yDir, time) {
+        const ball = document.createElement('a-sphere');
+        ball.setAttribute('radius', '0.1');
+        ball.setAttribute('color', '#ffffff');
+        ball.setAttribute('position', '0 1 -0.5'); // Start in front of camera
+        ball.setAttribute('dynamic-body', 'mass: 1');
+        
+        // Add "paper texture" feel
+        ball.setAttribute('roughness', '1');
+        
+        sceneEl.appendChild(ball);
 
-</body>
+        // Wait for physics to load then apply impulse
+        ball.addEventListener('body-loaded', () => {
+          const force = 12; // Adjust for "weight"
+          const impulse = new CANNON.Vec3(xDir * 5, yDir * force, -force);
+          const worldPoint = new CANNON.Vec3(0, 0, 0);
+          ball.body.applyImpulse(impulse, worldPoint);
+          
+          // Remove ball after 5 seconds to save memory
+          setTimeout(() => {
+            ball.parentNode.removeChild(ball);
+          }, 5000);
+        });
+      }
+    </script>
+  </body>
 </html>
