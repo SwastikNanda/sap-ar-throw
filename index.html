@@ -423,121 +423,225 @@
         }
 
         let startY, startTime;
-        window.addEventListener('touchstart', e => {
-            startY = e.touches[0].clientY;
-            startTime = Date.now();
-        });
+//         window.addEventListener('touchstart', e => {
+//             startY = e.touches[0].clientY;
+//             startTime = Date.now();
+//         });
 
-        window.addEventListener('touchend', e => {
-            if (!canThrow) return;
-            let dist = startY - e.changedTouches[0].clientY;
-            let duration = Date.now() - startTime;
+//         window.addEventListener('touchend', e => {
+//             if (!canThrow) return;
+//             let dist = startY - e.changedTouches[0].clientY;
+//             let duration = Date.now() - startTime;
 
-            if (dist > 60) {
-                canThrow = false;
-                throwBall(dist / duration);
-                setTimeout(() => { canThrow = true; }, 1000);
-            }
-        });
+//             if (dist > 60) {
+//                 canThrow = false;
+//                 throwBall(dist / duration);
+//                 setTimeout(() => { canThrow = true; }, 1000);
+//             }
+//         });
 
-        // function throwBall(speedFactor) {
-        //     const ball = document.createElement('a-sphere');
-        //     ball.setAttribute('radius', '0.15');
-        //     ball.setAttribute('color', 'white');
+//         //
+
+
+
+
+//         // function throwBall(speedFactor) {
+//         //     const ball = document.createElement('a-sphere');
+//         //     ball.setAttribute('radius', '0.15');
+//         //     ball.setAttribute('color', 'white');
             
-        //     // Calculate where the camera is looking in the WORLD
-        //     const direction = new THREE.Vector3(0, 0, -1);
-        //     cam.object3D.getWorldDirection(direction);
-        //     direction.multiplyScalar(-1); // Adjust for A-Frame's inverted Z
+//         //     // Calculate where the camera is looking in the WORLD
+//         //     const direction = new THREE.Vector3(0, 0, -1);
+//         //     cam.object3D.getWorldDirection(direction);
+//         //     direction.multiplyScalar(-1); // Adjust for A-Frame's inverted Z
 
-        //     const startPos = cam.object3D.getWorldPosition(new THREE.Vector3());
+//         //     const startPos = cam.object3D.getWorldPosition(new THREE.Vector3());
             
-        //     ball.setAttribute('position', startPos);
-        //     scene.appendChild(ball);
+//         //     ball.setAttribute('position', startPos);
+//         //     scene.appendChild(ball);
 
-        //     // The ball travels 6 meters in the direction you are looking
-        //     const travelDist = 6; 
-        //     const endPos = {
-        //         x: startPos.x + (direction.x * travelDist),
-        //         y: startPos.y, // It falls toward the floor
-        //         z: startPos.z + (direction.z * travelDist)
-        //     };
+//         //     // The ball travels 6 meters in the direction you are looking
+//         //     const travelDist = 6; 
+//         //     const endPos = {
+//         //         x: startPos.x + (direction.x * travelDist),
+//         //         y: startPos.y, // It falls toward the floor
+//         //         z: startPos.z + (direction.z * travelDist)
+//         //     };
 
-        //     // Animation for a clean arc
-        //     ball.setAttribute('animation', {
-        //         property: 'position',
-        //         to: `${endPos.x} ${endPos.y} ${endPos.z}`,
-        //         dur: 1000,
-        //         easing: 'easeOutQuad'
-        //     });
+//         //     // Animation for a clean arc
+//         //     ball.setAttribute('animation', {
+//         //         property: 'position',
+//         //         to: `${endPos.x} ${endPos.y} ${endPos.z}`,
+//         //         dur: 1000,
+//         //         easing: 'easeOutQuad'
+//         //     });
 
-        //     setTimeout(() => {
-        //         if (ball.parentNode) ball.parentNode.removeChild(ball);
-        //     }, 1100);
-        // }
+//         //     setTimeout(() => {
+//         //         if (ball.parentNode) ball.parentNode.removeChild(ball);
+//         //     }, 1100);
+//         // }
 
-        function throwBall() {
+
+
+//         //
+
+
+//         function throwBall() {
+//     const ball = document.createElement('a-sphere');
+//     ball.setAttribute('radius', '0.12');
+//     ball.setAttribute('color', 'white');
+    
+//     // 1. Get Camera's World Position and Aim Direction
+//     const startPos = new THREE.Vector3();
+//     cam.object3D.getWorldPosition(startPos);
+
+//     const direction = new THREE.Vector3(0, 0, -1);
+//     direction.applyQuaternion(cam.object3D.quaternion);
+
+//     // 2. Spawn ball slightly in front of the camera so you see it leave the screen
+//     ball.setAttribute('position', {
+//         x: startPos.x + direction.x * 0.5,
+//         y: startPos.y + direction.y * 0.5,
+//         z: startPos.z + direction.z * 0.5
+//     });
+
+//     scene.appendChild(ball);
+
+//     // 3. Define the landing spot (8 meters in the direction you are aiming)
+//     const distance = 8;
+//     const endPos = {
+//         x: startPos.x + direction.x * distance,
+//         y: -1.2, // This is "floor level" in your AR world
+//         z: startPos.z + direction.z * distance
+//     };
+
+//     // 4. ANIMATION: Forward Movement (Linear)
+//     ball.setAttribute('animation__pos', {
+//         property: 'position',
+//         to: `${endPos.x} ${endPos.y} ${endPos.z}`,
+//         dur: 1200,
+//         easing: 'linear'
+//     });
+
+//     // 5. ANIMATION: The "Arc" (Making it go UP then DOWN)
+//     // We animate the 'y' coordinate separately to create a curve
+//     const peakHeight = startPos.y + 0.3 ; // How high the ball "jumps"
+    
+//     ball.setAttribute('animation__up', {
+//         property: 'object3D.position.y',
+//         from: startPos.y,
+//         to: peakHeight,
+//         dur: 400,
+//         easing: 'easeOutQuad'
+//     });
+
+//     // After 400ms (peak), we start the fall
+//     setTimeout(() => {
+//         ball.setAttribute('animation__down', {
+//             property: 'object3D.position.y',
+//             to: endPos.y,
+//             dur: 800,
+//             easing: 'easeInQuad'
+//         });
+//     }, 400);
+
+//     // Cleanup
+//     setTimeout(() => {
+//         if (ball.parentNode) ball.parentNode.removeChild(ball);
+//     }, 1300);
+// }
+
+
+
+let startX, startY, startTime;
+
+window.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    startTime = Date.now();
+});
+
+window.addEventListener('touchend', (e) => {
+    if (!canThrow) return;
+
+    let endX = e.changedTouches[0].clientX;
+    let endY = e.changedTouches[0].clientY;
+    let duration = Date.now() - startTime;
+
+    let diffX = endX - startX; // Positive = swipe right, Negative = swipe left
+    let diffY = startY - endY; // Vertical distance
+
+    if (diffY > 60) {
+        canThrow = false;
+        // Calculate horizontal tilt (normalized between -1 and 1)
+        let horizontalTilt = diffX / window.innerWidth; 
+        throwBall(horizontalTilt);
+        setTimeout(() => { canThrow = true; }, 1200);
+    }
+});
+
+function throwBall(tilt) {
+    const wrapper = document.createElement('a-entity');
     const ball = document.createElement('a-sphere');
     ball.setAttribute('radius', '0.12');
     ball.setAttribute('color', 'white');
-    
-    // 1. Get Camera's World Position and Aim Direction
+    wrapper.appendChild(ball);
+    scene.appendChild(wrapper);
+
     const startPos = new THREE.Vector3();
     cam.object3D.getWorldPosition(startPos);
-
+    
+    // Get the base direction from the camera
     const direction = new THREE.Vector3(0, 0, -1);
     direction.applyQuaternion(cam.object3D.quaternion);
 
-    // 2. Spawn ball slightly in front of the camera so you see it leave the screen
-    ball.setAttribute('position', {
+    // --- NEW: Apply horizontal tilt to the direction ---
+    // This shifts the landing spot left or right based on the swipe
+    const sideVector = new THREE.Vector3(1, 0, 0); 
+    sideVector.applyQuaternion(cam.object3D.quaternion);
+    direction.addScaledVector(sideVector, tilt * 1.5); // Adjust 1.5 to make it more/less sensitive
+
+    wrapper.setAttribute('position', {
         x: startPos.x + direction.x * 0.5,
         y: startPos.y + direction.y * 0.5,
         z: startPos.z + direction.z * 0.5
     });
 
-    scene.appendChild(ball);
-
-    // 3. Define the landing spot (8 meters in the direction you are aiming)
     const distance = 8;
     const endPos = {
         x: startPos.x + direction.x * distance,
-        y: -1.2, // This is "floor level" in your AR world
+        y: -1.5, 
         z: startPos.z + direction.z * distance
     };
 
-    // 4. ANIMATION: Forward Movement (Linear)
-    ball.setAttribute('animation__pos', {
+    // Forward animation
+    wrapper.setAttribute('animation', {
         property: 'position',
         to: `${endPos.x} ${endPos.y} ${endPos.z}`,
         dur: 1200,
         easing: 'linear'
     });
 
-    // 5. ANIMATION: The "Arc" (Making it go UP then DOWN)
-    // We animate the 'y' coordinate separately to create a curve
-    const peakHeight = startPos.y + 0.3 ; // How high the ball "jumps"
-    
+    // Vertical Arc (The Curve)
     ball.setAttribute('animation__up', {
-        property: 'object3D.position.y',
-        from: startPos.y,
-        to: peakHeight,
-        dur: 400,
+        property: 'position',
+        from: '0 0 0',
+        to: '0 1.5 0',
+        dur: 450,
         easing: 'easeOutQuad'
     });
 
-    // After 400ms (peak), we start the fall
     setTimeout(() => {
         ball.setAttribute('animation__down', {
-            property: 'object3D.position.y',
-            to: endPos.y,
-            dur: 800,
+            property: 'position',
+            to: '0 0 0',
+            dur: 750,
             easing: 'easeInQuad'
         });
-    }, 400);
+    }, 450);
 
-    // Cleanup
     setTimeout(() => {
-        if (ball.parentNode) ball.parentNode.removeChild(ball);
+        if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
     }, 1300);
 }
     </script>
