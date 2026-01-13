@@ -497,8 +497,8 @@
 
     scene.appendChild(ball);
 
-    // 3. Define the landing spot (6 meters in the direction you are aiming)
-    const distance = 6;
+    // 3. Define the landing spot (8 meters in the direction you are aiming)
+    const distance = 8;
     const endPos = {
         x: startPos.x + direction.x * distance,
         y: -1.2, // This is "floor level" in your AR world
@@ -515,7 +515,7 @@
 
     // 5. ANIMATION: The "Arc" (Making it go UP then DOWN)
     // We animate the 'y' coordinate separately to create a curve
-    const peakHeight = startPos.y + 1 ; // How high the ball "jumps"
+    const peakHeight = startPos.y + 0.3 ; // How high the ball "jumps"
     
     ball.setAttribute('animation__up', {
         property: 'object3D.position.y',
