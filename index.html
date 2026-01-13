@@ -646,18 +646,20 @@ function endGame() {
     //     }, 400);
 
     function throwBall(tilt) {
+
     const currentItem = gameConfig[Math.floor(Math.random() * gameConfig.length)];
     const wrapper = document.createElement('a-entity');
     const ball = document.createElement('a-sphere');
     const label = document.createElement('a-text');
 
+    // 1. Force Rendering Priority
     ball.setAttribute('radius', '0.15');
     ball.setAttribute('color', 'white');
+    ball.setAttribute('material', 'shader: flat; depthTest: true;'); // Ensures it doesn't clip
 
-    // Label settings - made larger and slightly higher for readability
     label.setAttribute('value', currentItem.label);
     label.setAttribute('align', 'center');
-    label.setAttribute('color', '#111'); // Darker for contrast
+    label.setAttribute('color', 'black');
     label.setAttribute('scale', '1.2 1.2 1.2'); 
     label.setAttribute('position', '0 0.4 0');
     
@@ -665,31 +667,30 @@ function endGame() {
     wrapper.appendChild(label);
     scene.appendChild(wrapper);
 
+    // 2. CALCULATE VISIBLE START POSITION
     const startPos = new THREE.Vector3();
     cam.object3D.getWorldPosition(startPos);
+    
     const direction = new THREE.Vector3(0, 0, -1);
     direction.applyQuaternion(cam.object3D.quaternion);
-    
-    // --- ADJUSTED SPAWN ---
-    // We spawn it 0.4m in front and 0.3m BELOW the eye line
-    wrapper.setAttribute('position', {
-        x: startPos.x + direction.x * 0.4,
-        y: startPos.y - 0.3, 
-        z: startPos.z + direction.z * 0.4
-    });
 
-    const sideVector = new THREE.Vector3(1, 0, 0); 
-    sideVector.applyQuaternion(cam.object3D.quaternion);
-    direction.addScaledVector(sideVector, tilt * 2); 
+    // MOVE SPAWN POINT: 1 meter forward and 0.5 meters down from eyes
+    // This puts it clearly in the "lower center" of your screen
+    const spawnX = startPos.x + direction.x * 1.0; 
+    const spawnY = startPos.y - 0.5; 
+    const spawnZ = startPos.z + direction.z * 1.0;
 
-    const distance = 8;
+    wrapper.setAttribute('position', { x: spawnX, y: spawnY, z: spawnZ });
+
+    // 3. TARGET CALCULATIONS (Landing 8m away)
     const endPos = {
-        x: startPos.x + direction.x * distance,
+        x: startPos.x + direction.x * 8 + (tilt * 4), // Added more horizontal range
         y: -1.5, 
-        z: startPos.z + direction.z * distance
+        z: startPos.z + direction.z * 8
     };
 
-    // Forward animation
+    // 4. ANIMATIONS
+    // Forward movement
     wrapper.setAttribute('animation', { 
         property: 'position', 
         to: `${endPos.x} ${endPos.y} ${endPos.z}`, 
@@ -697,27 +698,23 @@ function endGame() {
         easing: 'linear' 
     });
 
-    // Vertical Arc - Modified to start from the 'held' position
+    // The Arc (Up then Down)
     ball.setAttribute('animation__up', { 
         property: 'position', 
         from: '0 0 0', 
-        to: '0 1.8 0', // Higher arc so it stays in view longer
-        dur: 450, 
+        to: '0 2.5 0', // Higher arc to keep it on screen longer
+        dur: 500, 
         easing: 'easeOutQuad' 
     });
     
-    label.setAttribute('animation__up', { 
-        property: 'position', 
-        from: '0 0.4 0', 
-        to: '0 2.2 0', 
-        dur: 450, 
-        easing: 'easeOutQuad' 
-    });
-
     setTimeout(() => {
-        ball.setAttribute('animation__down', { property: 'position', to: '0 0 0', dur: 750, easing: 'easeInQuad' });
-        label.setAttribute('animation__down', { property: 'position', to: '0 0.4 0', dur: 750, easing: 'easeInQuad' });
-    }, 450);
+        ball.setAttribute('animation__down', { 
+            property: 'position', 
+            to: '0 0 0', 
+            dur: 700, 
+            easing: 'easeInQuad' 
+        });
+    }, 500);
 
         setTimeout(() => {
             const buckets = ['basket-left', 'basket-center', 'basket-right'];
