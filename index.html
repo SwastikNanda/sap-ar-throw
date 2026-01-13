@@ -499,51 +499,57 @@
     <div id="score-val" style="color:white; font-size:32px; font-weight:bold;">0</div>
 </div>
 
+<div id="target-container" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:1001; text-align:center; font-family:sans-serif; pointer-events:none;">
+    <div style="color:#67e8f9; font-size:12px; font-weight:bold; letter-spacing: 2px; text-shadow:1px 1px 2px #000;">HOLDING</div>
+    <div id="current-label-ui" style="color:white; font-size:28px; font-weight:bold; text-shadow:2px 2px 5px #000; background:rgba(0,0,0,0.3); padding:5px 20px; border-radius:15px; border:1px solid rgba(255,255,255,0.2);">---</div>
+</div>
+
 <div id="timer-container" style="position:fixed; top:20px; right:20px; z-index:1001; pointer-events:none; font-family:sans-serif; text-shadow:2px 2px 4px #000; text-align:right;">
     <div style="color:#e67e22; font-size:12px; font-weight:bold; letter-spacing: 1px;">TIME</div>
     <div id="time-val" style="color:white; font-size:32px; font-weight:bold;">60</div>
 </div>
 
 <script>
-    let score = 0;
-    let timeLeft = 60;
-    let canThrow = false; // Disabled until "Start" is clicked
-    let gameActive = false;
-    let timerInterval;
+  let score = 0;
+let timeLeft = 60;
+let canThrow = false;
+let gameActive = false;
+let timerInterval;
+let currentItem = null; // Stores the item currently "in hand"
 
-    const scene = document.querySelector('a-scene');
-    const cam = document.querySelector('#mainCam');
+const scene = document.querySelector('a-scene');
+const cam = document.querySelector('#mainCam');
 
-    const gameConfig = [
-        { label: "Apple", target: "basket-left" },
-        { label: "Banana", target: "basket-left" },
-        { label: "Carrot", target: "basket-center" },
-        { label: "Broccoli", target: "basket-center" },
-        { label: "Lollipop", target: "basket-right" },
-        { label: "Chocolate", target: "basket-right" }
-    ];
+const gameConfig = [
+    { label: "Apple", target: "basket-left" },
+    { label: "Banana", target: "basket-left" },
+    { label: "Carrot", target: "basket-center" },
+    { label: "Broccoli", target: "basket-center" },
+    { label: "Lollipop", target: "basket-right" },
+    { label: "Chocolate", target: "basket-right" }
+];
 
-//   let score = 0;
-// let timeLeft = 60;
-// let canThrow = false;
-// let gameActive = false;
-// let timerInterval;
+// NEW: Function to pick the next item and update the Top UI
+function prepareNextItem() {
+    currentItem = gameConfig[Math.floor(Math.random() * gameConfig.length)];
+    const uiLabel = document.getElementById('current-label-ui');
+    if (uiLabel) {
+        uiLabel.innerText = currentItem.label.toUpperCase();
+    }
+}
 
 function start() {
-    // 1. Hide the overlay
     document.getElementById('overlay').style.display = 'none';
-    
-    // 2. Reset game state
     score = 0;
     timeLeft = 60;
     gameActive = true;
     canThrow = true;
     
-    // 3. Reset UI
     document.getElementById('score-val').innerText = "0";
     document.getElementById('time-val').innerText = "60";
     document.getElementById('time-val').style.color = "white";
     
+    prepareNextItem(); // Load the first item
     startTimer();
 }
 
@@ -553,7 +559,6 @@ function startTimer() {
         const timerEl = document.getElementById('time-val');
         timerEl.innerText = timeLeft;
 
-        // Visual warning when time is low
         if (timeLeft <= 10) {
             timerEl.style.color = "#ff3333";
         }
@@ -568,119 +573,61 @@ function endGame() {
     clearInterval(timerInterval);
     gameActive = false;
     canThrow = false;
-    
     alert("Time's Up! \nFinal Score: " + score);
-    
-    // Simple reset to the menu
     location.reload();
 }
 
-    // --- SWIPE LOGIC ---
-    let startX, startY, startTime;
-    window.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-        startTime = Date.now();
-    });
+// --- SWIPE LOGIC ---
+let startX, startY, startTime;
+window.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    startTime = Date.now();
+});
 
-    window.addEventListener('touchend', (e) => {
-        if (!canThrow || !gameActive) return;
+window.addEventListener('touchend', (e) => {
+    if (!canThrow || !gameActive) return;
 
-        let diffX = e.changedTouches[0].clientX - startX;
-        let diffY = startY - e.changedTouches[0].clientY;
+    let diffX = e.changedTouches[0].clientX - startX;
+    let diffY = startY - e.changedTouches[0].clientY;
 
-        if (diffY > 60) {
-            canThrow = false;
-            let horizontalTilt = diffX / window.innerWidth; 
-            throwBall(horizontalTilt);
-            // Quick cooldown for throwing
-            setTimeout(() => { if(gameActive) canThrow = true; }, 800);
-        }
-    });
+    if (diffY > 60) {
+        canThrow = false;
+        let horizontalTilt = diffX / window.innerWidth; 
+        throwBall(horizontalTilt);
+        setTimeout(() => { if(gameActive) canThrow = true; }, 800);
+    }
+});
 
-    // function throwBall(tilt) {
-    //     const currentItem = gameConfig[Math.floor(Math.random() * gameConfig.length)];
-    //     const wrapper = document.createElement('a-entity');
-    //     const ball = document.createElement('a-sphere');
-    //     const label = document.createElement('a-text');
-
-    //     ball.setAttribute('radius', '0.15');
-    //     ball.setAttribute('color', 'white');
-    //     label.setAttribute('value', currentItem.label);
-    //     label.setAttribute('align', 'center');
-    //     label.setAttribute('color', 'black');
-    //     label.setAttribute('position', '0 0.3 0');
-
-    //     wrapper.appendChild(ball);
-    //     wrapper.appendChild(label);
-    //     scene.appendChild(wrapper);
-
-    //     const startPos = new THREE.Vector3();
-    //     cam.object3D.getWorldPosition(startPos);
-    //     const direction = new THREE.Vector3(0, 0, -1);
-    //     direction.applyQuaternion(cam.object3D.quaternion);
-    //     const sideVector = new THREE.Vector3(1, 0, 0); 
-    //     sideVector.applyQuaternion(cam.object3D.quaternion);
-    //     direction.addScaledVector(sideVector, tilt * 2); 
-
-    //     wrapper.setAttribute('position', {
-    //         x: startPos.x + direction.x * 0.5,
-    //         y: startPos.y + direction.y * 0.5,
-    //         z: startPos.z + direction.z * 0.5
-    //     });
-
-    //     const distance = 8;
-    //     const endPos = {
-    //         x: startPos.x + direction.x * distance,
-    //         y: -1.5, 
-    //         z: startPos.z + direction.z * distance
-    //     };
-
-    //     wrapper.setAttribute('animation', { property: 'position', to: `${endPos.x} ${endPos.y} ${endPos.z}`, dur: 1000, easing: 'linear' });
-    //     ball.setAttribute('animation__up', { property: 'position', from: '0 0 0', to: '0 1.5 0', dur: 400, easing: 'easeOutQuad' });
-    //     label.setAttribute('animation__up', { property: 'position', from: '0 0.3 0', to: '0 1.8 0', dur: 400, easing: 'easeOutQuad' });
-
-    //     setTimeout(() => {
-    //         ball.setAttribute('animation__down', { property: 'position', to: '0 0 0', dur: 600, easing: 'easeInQuad' });
-    //         label.setAttribute('animation__down', { property: 'position', to: '0 0.3 0', dur: 600, easing: 'easeInQuad' });
-    //     }, 400);
-
-    function throwBall(tilt) {
-const currentItem = gameConfig[Math.floor(Math.random() * gameConfig.length)];
+function throwBall(tilt) {
+    // 1. Capture the item being thrown NOW
+    const itemBeingThrown = currentItem;
+    
     const wrapper = document.createElement('a-entity');
     const ball = document.createElement('a-sphere');
-    const label = document.createElement('a-text');
-
+    // NOTE: No 3D label created here, as it's now in the Top UI
+    
     ball.setAttribute('radius', '0.15');
     ball.setAttribute('color', 'white');
-
-    // Label settings - made larger and slightly higher for readability
-    label.setAttribute('value', currentItem.label);
-    label.setAttribute('align', 'center');
-    label.setAttribute('color', '#111'); // Darker for contrast
-    label.setAttribute('scale', '1.2 1.2 1.2'); 
-    label.setAttribute('position', '0 0.4 0');
-    
     wrapper.appendChild(ball);
-    wrapper.appendChild(label);
     scene.appendChild(wrapper);
+
+    // 2. Immediately update UI for the NEXT throw
+    prepareNextItem();
 
     const startPos = new THREE.Vector3();
     cam.object3D.getWorldPosition(startPos);
     const direction = new THREE.Vector3(0, 0, -1);
     direction.applyQuaternion(cam.object3D.quaternion);
-    
-    // --- ADJUSTED SPAWN ---
-    // We spawn it 0.4m in front and 0.3m BELOW the eye line
-    wrapper.setAttribute('position', {
-        x: startPos.x + direction.x * 0.4,
-        y: startPos.y - 0.3, 
-        z: startPos.z + direction.z * 1
-    });
-
     const sideVector = new THREE.Vector3(1, 0, 0); 
     sideVector.applyQuaternion(cam.object3D.quaternion);
     direction.addScaledVector(sideVector, tilt * 2); 
+
+    wrapper.setAttribute('position', {
+        x: startPos.x + direction.x * 0.5,
+        y: startPos.y + direction.y * 0.5,
+        z: startPos.z + direction.z * 0.5
+    });
 
     const distance = 8;
     const endPos = {
@@ -689,74 +636,52 @@ const currentItem = gameConfig[Math.floor(Math.random() * gameConfig.length)];
         z: startPos.z + direction.z * distance
     };
 
-    // Forward animation
-    wrapper.setAttribute('animation', { 
-        property: 'position', 
-        to: `${endPos.x} ${endPos.y} ${endPos.z}`, 
-        dur: 1200, 
-        easing: 'linear' 
-    });
-
-    // Vertical Arc - Modified to start from the 'held' position
-    ball.setAttribute('animation__up', { 
-        property: 'position', 
-        from: '0 0 0', 
-        to: '0 1.8 0', // Higher arc so it stays in view longer
-        dur: 450, 
-        easing: 'easeOutQuad' 
-    });
-    
-    label.setAttribute('animation__up', { 
-        property: 'position', 
-        from: '0 0.4 0', 
-        to: '0 2.2 0', 
-        dur: 450, 
-        easing: 'easeOutQuad' 
-    });
+    wrapper.setAttribute('animation', { property: 'position', to: `${endPos.x} ${endPos.y} ${endPos.z}`, dur: 1000, easing: 'linear' });
+    ball.setAttribute('animation__up', { property: 'position', from: '0 0 0', to: '0 1.5 0', dur: 400, easing: 'easeOutQuad' });
 
     setTimeout(() => {
-        ball.setAttribute('animation__down', { property: 'position', to: '0 0 0', dur: 750, easing: 'easeInQuad' });
-        label.setAttribute('animation__down', { property: 'position', to: '0 0.4 0', dur: 750, easing: 'easeInQuad' });
-    }, 450);
+        ball.setAttribute('animation__down', { property: 'position', to: '0 0 0', dur: 600, easing: 'easeInQuad' });
+    }, 400);
 
-        setTimeout(() => {
-            const buckets = ['basket-left', 'basket-center', 'basket-right'];
-            buckets.forEach(id => {
-                const bucket = document.getElementById(id);
-                const bPos = bucket.object3D.position;
-                const dist = Math.sqrt(Math.pow(endPos.x - bPos.x, 2) + Math.pow(endPos.z - bPos.z, 2));
+    setTimeout(() => {
+        const buckets = ['basket-left', 'basket-center', 'basket-right'];
+        buckets.forEach(id => {
+            const bucket = document.getElementById(id);
+            const bPos = bucket.object3D.position;
+            const dist = Math.sqrt(Math.pow(endPos.x - bPos.x, 2) + Math.pow(endPos.z - bPos.z, 2));
 
-                if (dist < 0.9) {
-                    if (id === currentItem.target) {
-                        score += 10;
-                        updateScoreUI();
-                        wiggleBucket(bucket, true);
-                    } else {
-                        wiggleBucket(bucket, false);
-                    }
+            if (dist < 0.9) {
+                // Check against the item we captured at the START of the throw
+                if (id === itemBeingThrown.target) {
+                    score += 10;
+                    updateScoreUI();
+                    wiggleBucket(bucket, true);
+                } else {
+                    wiggleBucket(bucket, false);
                 }
-            });
-            if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
-        }, 1100);
-    }
-
-    function updateScoreUI() {
-        document.getElementById('score-val').innerText = score;
-    }
-
-    function wiggleBucket(entity, isCorrect) {
-        entity.setAttribute('animation__wiggle', {
-            property: 'rotation', to: '0 0 10', dur: 100, dir: 'alternate', loop: 4, easing: 'easeInOutQuad'
+            }
         });
-        const cylinder = entity.querySelector('a-cylinder');
-        const originalColor = cylinder.getAttribute('color');
-        cylinder.setAttribute('color', isCorrect ? '#2ecc71' : '#ff3333');
-        setTimeout(() => {
-            cylinder.setAttribute('color', originalColor);
-            entity.setAttribute('rotation', '0 0 0');
-            entity.removeAttribute('animation__wiggle');
-        }, 500);
-    }
+        if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+    }, 1100);
+}
+
+function updateScoreUI() {
+    document.getElementById('score-val').innerText = score;
+}
+
+function wiggleBucket(entity, isCorrect) {
+    entity.setAttribute('animation__wiggle', {
+        property: 'rotation', to: '0 0 10', dur: 100, dir: 'alternate', loop: 4, easing: 'easeInOutQuad'
+    });
+    const cylinder = entity.querySelector('a-cylinder');
+    const originalColor = cylinder.getAttribute('color');
+    cylinder.setAttribute('color', isCorrect ? '#2ecc71' : '#ff3333');
+    setTimeout(() => {
+        cylinder.setAttribute('color', originalColor);
+        entity.setAttribute('rotation', '0 0 0');
+        entity.removeAttribute('animation__wiggle');
+    }, 500);
+}
 </script>
 </body>
 </html>
