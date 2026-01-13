@@ -598,52 +598,126 @@ function endGame() {
         }
     });
 
+    // function throwBall(tilt) {
+    //     const currentItem = gameConfig[Math.floor(Math.random() * gameConfig.length)];
+    //     const wrapper = document.createElement('a-entity');
+    //     const ball = document.createElement('a-sphere');
+    //     const label = document.createElement('a-text');
+
+    //     ball.setAttribute('radius', '0.15');
+    //     ball.setAttribute('color', 'white');
+    //     label.setAttribute('value', currentItem.label);
+    //     label.setAttribute('align', 'center');
+    //     label.setAttribute('color', 'black');
+    //     label.setAttribute('position', '0 0.3 0');
+
+    //     wrapper.appendChild(ball);
+    //     wrapper.appendChild(label);
+    //     scene.appendChild(wrapper);
+
+    //     const startPos = new THREE.Vector3();
+    //     cam.object3D.getWorldPosition(startPos);
+    //     const direction = new THREE.Vector3(0, 0, -1);
+    //     direction.applyQuaternion(cam.object3D.quaternion);
+    //     const sideVector = new THREE.Vector3(1, 0, 0); 
+    //     sideVector.applyQuaternion(cam.object3D.quaternion);
+    //     direction.addScaledVector(sideVector, tilt * 2); 
+
+    //     wrapper.setAttribute('position', {
+    //         x: startPos.x + direction.x * 0.5,
+    //         y: startPos.y + direction.y * 0.5,
+    //         z: startPos.z + direction.z * 0.5
+    //     });
+
+    //     const distance = 8;
+    //     const endPos = {
+    //         x: startPos.x + direction.x * distance,
+    //         y: -1.5, 
+    //         z: startPos.z + direction.z * distance
+    //     };
+
+    //     wrapper.setAttribute('animation', { property: 'position', to: `${endPos.x} ${endPos.y} ${endPos.z}`, dur: 1000, easing: 'linear' });
+    //     ball.setAttribute('animation__up', { property: 'position', from: '0 0 0', to: '0 1.5 0', dur: 400, easing: 'easeOutQuad' });
+    //     label.setAttribute('animation__up', { property: 'position', from: '0 0.3 0', to: '0 1.8 0', dur: 400, easing: 'easeOutQuad' });
+
+    //     setTimeout(() => {
+    //         ball.setAttribute('animation__down', { property: 'position', to: '0 0 0', dur: 600, easing: 'easeInQuad' });
+    //         label.setAttribute('animation__down', { property: 'position', to: '0 0.3 0', dur: 600, easing: 'easeInQuad' });
+    //     }, 400);
+
     function throwBall(tilt) {
-        const currentItem = gameConfig[Math.floor(Math.random() * gameConfig.length)];
-        const wrapper = document.createElement('a-entity');
-        const ball = document.createElement('a-sphere');
-        const label = document.createElement('a-text');
+    const currentItem = gameConfig[Math.floor(Math.random() * gameConfig.length)];
+    const wrapper = document.createElement('a-entity');
+    const ball = document.createElement('a-sphere');
+    const label = document.createElement('a-text');
 
-        ball.setAttribute('radius', '0.15');
-        ball.setAttribute('color', 'white');
-        label.setAttribute('value', currentItem.label);
-        label.setAttribute('align', 'center');
-        label.setAttribute('color', 'black');
-        label.setAttribute('position', '0 0.3 0');
+    ball.setAttribute('radius', '0.15');
+    ball.setAttribute('color', 'white');
 
-        wrapper.appendChild(ball);
-        wrapper.appendChild(label);
-        scene.appendChild(wrapper);
+    // Label settings - made larger and slightly higher for readability
+    label.setAttribute('value', currentItem.label);
+    label.setAttribute('align', 'center');
+    label.setAttribute('color', '#111'); // Darker for contrast
+    label.setAttribute('scale', '1.2 1.2 1.2'); 
+    label.setAttribute('position', '0 0.4 0');
+    
+    wrapper.appendChild(ball);
+    wrapper.appendChild(label);
+    scene.appendChild(wrapper);
 
-        const startPos = new THREE.Vector3();
-        cam.object3D.getWorldPosition(startPos);
-        const direction = new THREE.Vector3(0, 0, -1);
-        direction.applyQuaternion(cam.object3D.quaternion);
-        const sideVector = new THREE.Vector3(1, 0, 0); 
-        sideVector.applyQuaternion(cam.object3D.quaternion);
-        direction.addScaledVector(sideVector, tilt * 2); 
+    const startPos = new THREE.Vector3();
+    cam.object3D.getWorldPosition(startPos);
+    const direction = new THREE.Vector3(0, 0, -1);
+    direction.applyQuaternion(cam.object3D.quaternion);
+    
+    // --- ADJUSTED SPAWN ---
+    // We spawn it 0.4m in front and 0.3m BELOW the eye line
+    wrapper.setAttribute('position', {
+        x: startPos.x + direction.x * 0.4,
+        y: startPos.y - 0.3, 
+        z: startPos.z + direction.z * 0.4
+    });
 
-        wrapper.setAttribute('position', {
-            x: startPos.x + direction.x * 0.5,
-            y: startPos.y + direction.y * 0.5,
-            z: startPos.z + direction.z * 0.5
-        });
+    const sideVector = new THREE.Vector3(1, 0, 0); 
+    sideVector.applyQuaternion(cam.object3D.quaternion);
+    direction.addScaledVector(sideVector, tilt * 2); 
 
-        const distance = 8;
-        const endPos = {
-            x: startPos.x + direction.x * distance,
-            y: -1.5, 
-            z: startPos.z + direction.z * distance
-        };
+    const distance = 8;
+    const endPos = {
+        x: startPos.x + direction.x * distance,
+        y: -1.5, 
+        z: startPos.z + direction.z * distance
+    };
 
-        wrapper.setAttribute('animation', { property: 'position', to: `${endPos.x} ${endPos.y} ${endPos.z}`, dur: 1000, easing: 'linear' });
-        ball.setAttribute('animation__up', { property: 'position', from: '0 0 0', to: '0 1.5 0', dur: 400, easing: 'easeOutQuad' });
-        label.setAttribute('animation__up', { property: 'position', from: '0 0.3 0', to: '0 1.8 0', dur: 400, easing: 'easeOutQuad' });
+    // Forward animation
+    wrapper.setAttribute('animation', { 
+        property: 'position', 
+        to: `${endPos.x} ${endPos.y} ${endPos.z}`, 
+        dur: 1200, 
+        easing: 'linear' 
+    });
 
-        setTimeout(() => {
-            ball.setAttribute('animation__down', { property: 'position', to: '0 0 0', dur: 600, easing: 'easeInQuad' });
-            label.setAttribute('animation__down', { property: 'position', to: '0 0.3 0', dur: 600, easing: 'easeInQuad' });
-        }, 400);
+    // Vertical Arc - Modified to start from the 'held' position
+    ball.setAttribute('animation__up', { 
+        property: 'position', 
+        from: '0 0 0', 
+        to: '0 1.8 0', // Higher arc so it stays in view longer
+        dur: 450, 
+        easing: 'easeOutQuad' 
+    });
+    
+    label.setAttribute('animation__up', { 
+        property: 'position', 
+        from: '0 0.4 0', 
+        to: '0 2.2 0', 
+        dur: 450, 
+        easing: 'easeOutQuad' 
+    });
+
+    setTimeout(() => {
+        ball.setAttribute('animation__down', { property: 'position', to: '0 0 0', dur: 750, easing: 'easeInQuad' });
+        label.setAttribute('animation__down', { property: 'position', to: '0 0.4 0', dur: 750, easing: 'easeInQuad' });
+    }, 450);
 
         setTimeout(() => {
             const buckets = ['basket-left', 'basket-center', 'basket-right'];
