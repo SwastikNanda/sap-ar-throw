@@ -401,7 +401,7 @@
         <p style="margin-top:10px">Look straight ahead before clicking</p>
     </div>
 
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;">
+    <!-- <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;">
         
         <a-entity id="basket" position="0 -2 -7">
             <a-cylinder color="#e74c3c" height="1" radius="0.5" open-ended="true" side="double"></a-cylinder>
@@ -411,7 +411,35 @@
 
         <a-entity camera look-controls id="mainCam"></a-entity>
 
-    </a-scene>
+    </a-scene> -->
+
+    <a-scene 
+    embedded 
+    arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best; detectionMode: mono_and_matrix;"
+    vr-mode-ui="enabled: false"
+    renderer="logarithmicDepthBuffer: true;">
+
+    <a-entity id="world-root">
+        <a-entity id="basket" position="0 -1.5 -7">
+            <a-cylinder color="#e74c3c" height="1" radius="0.5" open-ended="true" side="double"></a-cylinder>
+            <a-circle position="0 -0.45 0" rotation="-90 0 0" radius="0.5" color="#2c3e50"></a-circle>
+            
+            <a-text value="STATIONARY BIN" align="center" position="0 1.5 0" scale="2 2 2" color="white"></a-text>
+            
+            <a-ring color="black" radius-inner="0.4" radius-outer="0.7" rotation="-90 0 0" position="0 -0.49 0" opacity="0.4"></a-ring>
+        </a-entity>
+    </a-entity>
+
+    <a-entity id="camera-rig" position="0 1.6 0">
+        <a-camera id="mainCam" look-controls="enabled: true" wasd-controls-enabled="false">
+            <a-entity cursor="fuse: false" position="0 0 -1"
+                      geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.015"
+                      material="color: #FFF; shader: flat">
+            </a-entity>
+        </a-camera>
+    </a-entity>
+
+</a-scene>
 
     <script>
         let canThrow = true;
