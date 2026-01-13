@@ -663,79 +663,183 @@ let canThrow = true;
             }
         });
 
-        function throwBall(tilt) {
-            const wrapper = document.createElement('a-entity');
-            const ball = document.createElement('a-sphere');
-            const label = document.createElement('a-text');
+        // function throwBall(tilt) {
+        //     const wrapper = document.createElement('a-entity');
+        //     const ball = document.createElement('a-sphere');
+        //     const label = document.createElement('a-text');
 
-            // Ball & Label Properties
-            ball.setAttribute('radius', '0.12');
-            ball.setAttribute('color', 'white');
+        //     // Ball & Label Properties
+        //     ball.setAttribute('radius', '0.12');
+        //     ball.setAttribute('color', 'white');
 
-            label.setAttribute('value', 'BALL'); // Change this to whatever text you want
-            label.setAttribute('align', 'center');
-            label.setAttribute('color', 'black');
-            label.setAttribute('scale', '0.8 0.8 0.8');
-            label.setAttribute('position', '0 0.25 0'); // Position text above ball
+        //     label.setAttribute('value', 'BALL'); // Change this to whatever text you want
+        //     label.setAttribute('align', 'center');
+        //     label.setAttribute('color', 'black');
+        //     label.setAttribute('scale', '0.8 0.8 0.8');
+        //     label.setAttribute('position', '0 0.25 0'); // Position text above ball
 
-            wrapper.appendChild(ball);
-            wrapper.appendChild(label);
-            scene.appendChild(wrapper);
+        //     wrapper.appendChild(ball);
+        //     wrapper.appendChild(label);
+        //     scene.appendChild(wrapper);
 
-            const startPos = new THREE.Vector3();
-            cam.object3D.getWorldPosition(startPos);
+        //     const startPos = new THREE.Vector3();
+        //     cam.object3D.getWorldPosition(startPos);
             
-            const direction = new THREE.Vector3(0, 0, -1);
-            direction.applyQuaternion(cam.object3D.quaternion);
+        //     const direction = new THREE.Vector3(0, 0, -1);
+        //     direction.applyQuaternion(cam.object3D.quaternion);
 
-            const sideVector = new THREE.Vector3(1, 0, 0); 
-            sideVector.applyQuaternion(cam.object3D.quaternion);
-            direction.addScaledVector(sideVector, tilt * 2); // Tilt for left/right swiping
+        //     const sideVector = new THREE.Vector3(1, 0, 0); 
+        //     sideVector.applyQuaternion(cam.object3D.quaternion);
+        //     direction.addScaledVector(sideVector, tilt * 2); // Tilt for left/right swiping
 
-            wrapper.setAttribute('position', {
-                x: startPos.x + direction.x * 0.5,
-                y: startPos.y + direction.y * 0.5,
-                z: startPos.z + direction.z * 0.5
-            });
+        //     wrapper.setAttribute('position', {
+        //         x: startPos.x + direction.x * 0.5,
+        //         y: startPos.y + direction.y * 0.5,
+        //         z: startPos.z + direction.z * 0.5
+        //     });
 
-            const distance = 8;
-            const endPos = {
-                x: startPos.x + direction.x * distance,
-                y: -1.5, 
-                z: startPos.z + direction.z * distance
-            };
+        //     const distance = 8;
+        //     const endPos = {
+        //         x: startPos.x + direction.x * distance,
+        //         y: -1.5, 
+        //         z: startPos.z + direction.z * distance
+        //     };
 
-            // Forward animation (moves the wrapper)
-            wrapper.setAttribute('animation', {
-                property: 'position', to: `${endPos.x} ${endPos.y} ${endPos.z}`,
-                dur: 1200, easing: 'linear'
-            });
+        //     // Forward animation (moves the wrapper)
+        //     wrapper.setAttribute('animation', {
+        //         property: 'position', to: `${endPos.x} ${endPos.y} ${endPos.z}`,
+        //         dur: 1200, easing: 'linear'
+        //     });
 
-            // Arc animation (moves the ball and label together inside the wrapper)
-            ball.setAttribute('animation__up', {
-                property: 'position', from: '0 0 0', to: '0 1.5 0',
-                dur: 450, easing: 'easeOutQuad'
-            });
-            label.setAttribute('animation__up', {
-                property: 'position', from: '0 0.25 0', to: '0 1.75 0',
-                dur: 450, easing: 'easeOutQuad'
-            });
+        //     // Arc animation (moves the ball and label together inside the wrapper)
+        //     ball.setAttribute('animation__up', {
+        //         property: 'position', from: '0 0 0', to: '0 1.5 0',
+        //         dur: 450, easing: 'easeOutQuad'
+        //     });
+        //     label.setAttribute('animation__up', {
+        //         property: 'position', from: '0 0.25 0', to: '0 1.75 0',
+        //         dur: 450, easing: 'easeOutQuad'
+        //     });
 
-            setTimeout(() => {
-                ball.setAttribute('animation__down', {
-                    property: 'position', to: '0 0 0',
-                    dur: 750, easing: 'easeInQuad'
-                });
-                label.setAttribute('animation__down', {
-                    property: 'position', to: '0 0.25 0',
-                    dur: 750, easing: 'easeInQuad'
-                });
-            }, 450);
+        //     setTimeout(() => {
+        //         ball.setAttribute('animation__down', {
+        //             property: 'position', to: '0 0 0',
+        //             dur: 750, easing: 'easeInQuad'
+        //         });
+        //         label.setAttribute('animation__down', {
+        //             property: 'position', to: '0 0.25 0',
+        //             dur: 750, easing: 'easeInQuad'
+        //         });
+        //     }, 450);
 
-            setTimeout(() => {
-                if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
-            }, 1300);
-        }
+        //     setTimeout(() => {
+        //         if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+        //     }, 1300);
+        // }
+
+        function throwBall(tilt) {
+    const wrapper = document.createElement('a-entity');
+    const ball = document.createElement('a-sphere');
+    const label = document.createElement('a-text');
+
+    ball.setAttribute('radius', '0.12');
+    ball.setAttribute('color', 'white');
+    label.setAttribute('value', 'TOSS!'); 
+    label.setAttribute('align', 'center');
+    label.setAttribute('color', 'black');
+    label.setAttribute('scale', '0.8 0.8 0.8');
+    label.setAttribute('position', '0 0.25 0');
+
+    wrapper.appendChild(ball);
+    wrapper.appendChild(label);
+    scene.appendChild(wrapper);
+
+    const startPos = new THREE.Vector3();
+    cam.object3D.getWorldPosition(startPos);
+    const direction = new THREE.Vector3(0, 0, -1);
+    direction.applyQuaternion(cam.object3D.quaternion);
+
+    const sideVector = new THREE.Vector3(1, 0, 0); 
+    sideVector.applyQuaternion(cam.object3D.quaternion);
+    direction.addScaledVector(sideVector, tilt * 2); 
+
+    wrapper.setAttribute('position', {
+        x: startPos.x + direction.x * 0.5,
+        y: startPos.y + direction.y * 0.5,
+        z: startPos.z + direction.z * 0.5
+    });
+
+    const distance = 8;
+    const endPos = {
+        x: startPos.x + direction.x * distance,
+        y: -1.5, 
+        z: startPos.z + direction.z * distance
+    };
+
+    wrapper.setAttribute('animation', {
+        property: 'position', to: `${endPos.x} ${endPos.y} ${endPos.z}`,
+        dur: 1200, easing: 'linear'
+    });
+
+    ball.setAttribute('animation__up', {
+        property: 'position', from: '0 0 0', to: '0 1.5 0',
+        dur: 450, easing: 'easeOutQuad'
+    });
+    label.setAttribute('animation__up', {
+        property: 'position', from: '0 0.25 0', to: '0 1.75 0',
+        dur: 450, easing: 'easeOutQuad'
+    });
+
+    setTimeout(() => {
+        ball.setAttribute('animation__down', { property: 'position', to: '0 0 0', dur: 750, easing: 'easeInQuad' });
+        label.setAttribute('animation__down', { property: 'position', to: '0 0.25 0', dur: 750, easing: 'easeInQuad' });
+    }, 450);
+
+    // --- NEW: WIGGLE DETECTION ---
+    setTimeout(() => {
+        const buckets = ['basket-left', 'basket-center', 'basket-right'];
+        
+        buckets.forEach(id => {
+            const bucket = document.getElementById(id);
+            const bPos = bucket.object3D.position;
+            
+            // Check distance between ball landing (endPos) and bucket
+            const dx = endPos.x - bPos.x;
+            const dz = endPos.z - bPos.z;
+            const dist = Math.sqrt(dx*dx + dz*dz);
+
+            // If ball lands within 0.7 meters of bucket center
+            if (dist < 0.7) {
+                wiggleBucket(bucket);
+            }
+        });
+
+        if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+    }, 1250);
+}
+
+function wiggleBucket(entity) {
+    // We use a multi-stage rotation animation to "shake" the bucket
+    entity.setAttribute('animation__wiggle', {
+        property: 'rotation',
+        from: '0 0 0',
+        to: '0 0 10',
+        dur: 100,
+        dir: 'alternate',
+        loop: 4,
+        easing: 'easeInOutQuad'
+    });
+    
+    // Optional: Make it change color briefly
+    const originalColor = "#e74c3c"; // Change this if your buckets have different colors
+    entity.querySelector('a-cylinder').setAttribute('color', '#2ecc71'); // Green for hit
+    
+    setTimeout(() => {
+        entity.querySelector('a-cylinder').setAttribute('color', entity.id.includes('left') ? '#3498db' : entity.id.includes('right') ? '#f1c40f' : '#e74c3c');
+        entity.removeAttribute('animation__wiggle');
+        entity.setAttribute('rotation', '0 0 0');
+    }, 500);
+}
     </script>
 </body>
 </html>
