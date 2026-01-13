@@ -494,13 +494,14 @@
 
     </a-scene>
 
- <div id="ui-container" style="position:fixed; top:20px; width:100%; display:flex; justify-content:space-around; z-index:1001; pointer-events:none;">
-    <div style="color:white; font-family:sans-serif; font-size:24px; text-shadow:2px 2px 4px #000;">
-        Score: <span id="score-val">0</span>
-    </div>
-    <div id="timer-display" style="color:white; font-family:sans-serif; font-size:24px; text-shadow:2px 2px 4px #000;">
-        Time: <span id="time-val">60</span>s
-    </div>
+<div id="score-container" style="position:fixed; top:20px; left:20px; z-index:1001; pointer-events:none; font-family:sans-serif; text-shadow:2px 2px 4px #000;">
+    <div style="color:#2ecc71; font-size:12px; font-weight:bold; letter-spacing: 1px;">SCORE</div>
+    <div id="score-val" style="color:white; font-size:32px; font-weight:bold;">0</div>
+</div>
+
+<div id="timer-container" style="position:fixed; top:20px; right:20px; z-index:1001; pointer-events:none; font-family:sans-serif; text-shadow:2px 2px 4px #000; text-align:right;">
+    <div style="color:#e67e22; font-size:12px; font-weight:bold; letter-spacing: 1px;">TIME</div>
+    <div id="time-val" style="color:white; font-size:32px; font-weight:bold;">60</div>
 </div>
 
 <script>
@@ -522,41 +523,57 @@
         { label: "Chocolate", target: "basket-right" }
     ];
 
-    function start() {
-        document.getElementById('overlay').style.display = 'none';
-        score = 0;
-        timeLeft = 60;
-        gameActive = true;
-        canThrow = true;
-        updateScoreUI();
-        startTimer();
-    }
+//   let score = 0;
+// let timeLeft = 60;
+// let canThrow = false;
+// let gameActive = false;
+// let timerInterval;
 
-    function startTimer() {
-        const timerText = document.getElementById('time-val');
-        const timerDiv = document.getElementById('timer-display');
-        
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            timerText.innerText = timeLeft;
+function start() {
+    // 1. Hide the overlay
+    document.getElementById('overlay').style.display = 'none';
+    
+    // 2. Reset game state
+    score = 0;
+    timeLeft = 60;
+    gameActive = true;
+    canThrow = true;
+    
+    // 3. Reset UI
+    document.getElementById('score-val').innerText = "0";
+    document.getElementById('time-val').innerText = "60";
+    document.getElementById('time-val').style.color = "white";
+    
+    startTimer();
+}
 
-            if (timeLeft <= 10) {
-                timerDiv.style.color = "#ff3333"; // Warning color
-            }
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        const timerEl = document.getElementById('time-val');
+        timerEl.innerText = timeLeft;
 
-            if (timeLeft <= 0) {
-                endGame();
-            }
-        }, 1000);
-    }
+        // Visual warning when time is low
+        if (timeLeft <= 10) {
+            timerEl.style.color = "#ff3333";
+        }
 
-    function endGame() {
-        clearInterval(timerInterval);
-        gameActive = false;
-        canThrow = false;
-        alert("Game Over! Final Score: " + score);
-        location.reload(); // Refresh to play again
-    }
+        if (timeLeft <= 0) {
+            endGame();
+        }
+    }, 1000);
+}
+
+function endGame() {
+    clearInterval(timerInterval);
+    gameActive = false;
+    canThrow = false;
+    
+    alert("Time's Up! \nFinal Score: " + score);
+    
+    // Simple reset to the menu
+    location.reload();
+}
 
     // --- SWIPE LOGIC ---
     let startX, startY, startTime;
