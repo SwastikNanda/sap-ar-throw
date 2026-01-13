@@ -674,8 +674,8 @@ const currentItem = gameConfig[Math.floor(Math.random() * gameConfig.length)];
     // We spawn it 0.4m in front and 0.3m BELOW the eye line
     wrapper.setAttribute('position', {
         x: startPos.x + direction.x * 0.4,
-        y: startPos.y + 0.2, 
-        z: startPos.z + direction.z * 1
+        y: startPos.y - 0.3, 
+        z: startPos.z + direction.z * 0.4
     });
 
     const sideVector = new THREE.Vector3(1, 0, 0); 
