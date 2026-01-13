@@ -455,14 +455,31 @@
         vr-mode-ui="enabled: false"
         renderer="logarithmicDepthBuffer: true;">
 
-        <a-entity id="world-root">
+        <!-- <a-entity id="world-root">
             <a-entity id="basket" position="0 -1.5 -7">
                 <a-cylinder color="#e74c3c" height="1" radius="0.5" open-ended="true" side="double"></a-cylinder>
                 <a-circle position="0 -0.45 0" rotation="-90 0 0" radius="0.5" color="#2c3e50"></a-circle>
                 <a-text value="STATIONARY BIN" align="center" position="0 1.5 0" scale="2 2 2" color="white"></a-text>
                 <a-ring color="black" radius-inner="0.4" radius-outer="0.7" rotation="-90 0 0" position="0 -0.49 0" opacity="0.4"></a-ring>
             </a-entity>
-        </a-entity>
+        </a-entity> -->
+
+        <a-entity id="world-root">
+    <a-entity id="basket-center" position="0 -1.5 -7">
+        <a-cylinder color="#e74c3c" height="1" radius="0.5" open-ended="true" side="double"></a-cylinder>
+        <a-text value="CENTER" align="center" position="0 1.5 0" scale="2 2 2"></a-text>
+    </a-entity>
+
+    <a-entity id="basket-left" position="-3 -1.5 -7">
+        <a-cylinder color="#3498db" height="1" radius="0.5" open-ended="true" side="double"></a-cylinder>
+        <a-text value="LEFT" align="center" position="0 1.5 0" scale="2 2 2"></a-text>
+    </a-entity>
+
+    <a-entity id="basket-right" position="3 -1.5 -7">
+        <a-cylinder color="#f1c40f" height="1" radius="0.5" open-ended="true" side="double"></a-cylinder>
+        <a-text value="RIGHT" align="center" position="0 1.5 0" scale="2 2 2"></a-text>
+    </a-entity>
+</a-entity>
 
         <a-entity id="camera-rig" position="0 1.6 0">
             <a-camera id="mainCam" 
@@ -478,13 +495,6 @@
     </a-scene>
 
     <script>
-        let canThrow = true;
-        const scene = document.querySelector('a-scene');
-        const cam = document.querySelector('#mainCam');
-
-        function start() {
-            document.getElementById('overlay').style.display = 'none';
-        }
 
         // let startY, startTime;
 //         window.addEventListener('touchstart', e => {
@@ -617,97 +627,115 @@
 
 
 
-let startX, startY, startTime;
 
-window.addEventListener('touchstart', (e) => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    startTime = Date.now();
-});
 
-window.addEventListener('touchend', (e) => {
-    if (!canThrow) return;
 
-    let endX = e.changedTouches[0].clientX;
-    let endY = e.changedTouches[0].clientY;
-    let duration = Date.now() - startTime;
 
-    let diffX = endX - startX; // Positive = swipe right, Negative = swipe left
-    let diffY = startY - endY; // Vertical distance
 
-    if (diffY > 60) {
-        canThrow = false;
-        // Calculate horizontal tilt (normalized between -1 and 1)
-        let horizontalTilt = diffX / window.innerWidth; 
-        throwBall(horizontalTilt);
-        setTimeout(() => { canThrow = true; }, 1200);
-    }
-});
+let canThrow = true;
+        const scene = document.querySelector('a-scene');
+        const cam = document.querySelector('#mainCam');
 
-function throwBall(tilt) {
-    const wrapper = document.createElement('a-entity');
-    const ball = document.createElement('a-sphere');
-    ball.setAttribute('radius', '0.12');
-    ball.setAttribute('color', 'white');
-    wrapper.appendChild(ball);
-    scene.appendChild(wrapper);
+        function start() {
+            document.getElementById('overlay').style.display = 'none';
+        }
 
-    const startPos = new THREE.Vector3();
-    cam.object3D.getWorldPosition(startPos);
-    
-    // Get the base direction from the camera
-    const direction = new THREE.Vector3(0, 0, -1);
-    direction.applyQuaternion(cam.object3D.quaternion);
+        let startX, startY, startTime;
 
-    // --- NEW: Apply horizontal tilt to the direction ---
-    // This shifts the landing spot left or right based on the swipe
-    const sideVector = new THREE.Vector3(1, 0, 0); 
-    sideVector.applyQuaternion(cam.object3D.quaternion);
-    direction.addScaledVector(sideVector, tilt * 1.5); // Adjust 1.5 to make it more/less sensitive
-
-    wrapper.setAttribute('position', {
-        x: startPos.x + direction.x * 0.5,
-        y: startPos.y + direction.y * 0.5,
-        z: startPos.z + direction.z * 0.5
-    });
-
-    const distance = 8;
-    const endPos = {
-        x: startPos.x + direction.x * distance,
-        y: -1.5, 
-        z: startPos.z + direction.z * distance
-    };
-
-    // Forward animation
-    wrapper.setAttribute('animation', {
-        property: 'position',
-        to: `${endPos.x} ${endPos.y} ${endPos.z}`,
-        dur: 1200,
-        easing: 'linear'
-    });
-
-    // Vertical Arc (The Curve)
-    ball.setAttribute('animation__up', {
-        property: 'position',
-        from: '0 0 0',
-        to: '0 1.5 0',
-        dur: 450,
-        easing: 'easeOutQuad'
-    });
-
-    setTimeout(() => {
-        ball.setAttribute('animation__down', {
-            property: 'position',
-            to: '0 0 0',
-            dur: 750,
-            easing: 'easeInQuad'
+        window.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            startTime = Date.now();
         });
-    }, 450);
 
-    setTimeout(() => {
-        if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
-    }, 1300);
-}
+        window.addEventListener('touchend', (e) => {
+            if (!canThrow) return;
+            let endX = e.changedTouches[0].clientX;
+            let endY = e.changedTouches[0].clientY;
+            let diffX = endX - startX;
+            let diffY = startY - endY;
+
+            if (diffY > 60) {
+                canThrow = false;
+                let horizontalTilt = diffX / window.innerWidth; 
+                throwBall(horizontalTilt);
+                setTimeout(() => { canThrow = true; }, 1200);
+            }
+        });
+
+        function throwBall(tilt) {
+            const wrapper = document.createElement('a-entity');
+            const ball = document.createElement('a-sphere');
+            const label = document.createElement('a-text');
+
+            // Ball & Label Properties
+            ball.setAttribute('radius', '0.12');
+            ball.setAttribute('color', 'white');
+
+            label.setAttribute('value', 'BALL'); // Change this to whatever text you want
+            label.setAttribute('align', 'center');
+            label.setAttribute('color', 'black');
+            label.setAttribute('scale', '0.8 0.8 0.8');
+            label.setAttribute('position', '0 0.25 0'); // Position text above ball
+
+            wrapper.appendChild(ball);
+            wrapper.appendChild(label);
+            scene.appendChild(wrapper);
+
+            const startPos = new THREE.Vector3();
+            cam.object3D.getWorldPosition(startPos);
+            
+            const direction = new THREE.Vector3(0, 0, -1);
+            direction.applyQuaternion(cam.object3D.quaternion);
+
+            const sideVector = new THREE.Vector3(1, 0, 0); 
+            sideVector.applyQuaternion(cam.object3D.quaternion);
+            direction.addScaledVector(sideVector, tilt * 2); // Tilt for left/right swiping
+
+            wrapper.setAttribute('position', {
+                x: startPos.x + direction.x * 0.5,
+                y: startPos.y + direction.y * 0.5,
+                z: startPos.z + direction.z * 0.5
+            });
+
+            const distance = 8;
+            const endPos = {
+                x: startPos.x + direction.x * distance,
+                y: -1.5, 
+                z: startPos.z + direction.z * distance
+            };
+
+            // Forward animation (moves the wrapper)
+            wrapper.setAttribute('animation', {
+                property: 'position', to: `${endPos.x} ${endPos.y} ${endPos.z}`,
+                dur: 1200, easing: 'linear'
+            });
+
+            // Arc animation (moves the ball and label together inside the wrapper)
+            ball.setAttribute('animation__up', {
+                property: 'position', from: '0 0 0', to: '0 1.5 0',
+                dur: 450, easing: 'easeOutQuad'
+            });
+            label.setAttribute('animation__up', {
+                property: 'position', from: '0 0.25 0', to: '0 1.75 0',
+                dur: 450, easing: 'easeOutQuad'
+            });
+
+            setTimeout(() => {
+                ball.setAttribute('animation__down', {
+                    property: 'position', to: '0 0 0',
+                    dur: 750, easing: 'easeInQuad'
+                });
+                label.setAttribute('animation__down', {
+                    property: 'position', to: '0 0.25 0',
+                    dur: 750, easing: 'easeInQuad'
+                });
+            }, 450);
+
+            setTimeout(() => {
+                if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+            }, 1300);
+        }
     </script>
 </body>
 </html>
