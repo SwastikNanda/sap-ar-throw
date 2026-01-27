@@ -186,65 +186,162 @@
             }
         });
 
+        // function throwBall(tilt) {
+        //     const itemBeingThrown = currentItem;
+        //     const wrapper = document.createElement('a-entity');
+        //     const ball = document.createElement('a-sphere');
+
+        //     ball.setAttribute('radius', '0.15');
+        //     ball.setAttribute('color', 'white');
+        //     ball.setAttribute('material', 'emissive: #ffffff; emissiveIntensity: 0.3');
+        //     wrapper.appendChild(ball);
+        //     scene.appendChild(wrapper);
+
+        //     prepareNextItem(); // Update Top UI for next turn immediately
+
+        //     const startPos = new THREE.Vector3();
+        //     cam.object3D.getWorldPosition(startPos);
+        //     const direction = new THREE.Vector3(0, 0, -1);
+        //     direction.applyQuaternion(cam.object3D.quaternion);
+
+        //     const sideVector = new THREE.Vector3(1, 0, 0);
+        //     sideVector.applyQuaternion(cam.object3D.quaternion);
+        //     direction.addScaledVector(sideVector, tilt * 2.5); 
+
+        //     const endPos = {
+        //         x: startPos.x + direction.x * 8,
+        //         y: -1.5,
+        //         z: startPos.z + direction.z * 8
+        //     };
+
+        //     wrapper.setAttribute('animation', { 
+        //         property: 'position', 
+        //         to: `${endPos.x} ${endPos.y} ${endPos.z}`, 
+        //         dur: 800, 
+        //         easing: 'easeOutQuad' 
+        //     });
+
+        //     setTimeout(() => {
+        //         const buckets = ['basket-sap', 'basket-not-sap'];
+        //         let hitResult = null;
+
+        //         buckets.forEach(id => {
+        //             const bucket = document.getElementById(id);
+        //             const bPos = bucket.object3D.position;
+        //             const dist = Math.sqrt(Math.pow(endPos.x - bPos.x, 2) + Math.pow(endPos.z - bPos.z, 2));
+
+        //             if (dist < 1.0) {
+        //                 hitResult = (id === itemBeingThrown.target);
+        //                 if (hitResult) {
+        //                     score += 10;
+        //                     wiggleBucket(bucket, true);
+        //                 } else {
+        //                     score -= 5;
+        //                     wiggleBucket(bucket, false);
+        //                 }
+        //                 document.getElementById('score-val').innerText = score;
+        //             }
+        //         });
+        //         if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+        //     }, 850);
+        // }
+
+
         function throwBall(tilt) {
-            const itemBeingThrown = currentItem;
-            const wrapper = document.createElement('a-entity');
-            const ball = document.createElement('a-sphere');
+    const itemBeingThrown = currentItem;
+    const wrapper = document.createElement('a-entity');
+    const ball = document.createElement('a-sphere');
 
-            ball.setAttribute('radius', '0.15');
-            ball.setAttribute('color', 'white');
-            ball.setAttribute('material', 'emissive: #ffffff; emissiveIntensity: 0.3');
-            wrapper.appendChild(ball);
-            scene.appendChild(wrapper);
+    ball.setAttribute('radius', '0.15');
+    ball.setAttribute('color', 'white');
+    ball.setAttribute('material', 'emissive: #ffffff; emissiveIntensity: 0.3');
+    
+    wrapper.appendChild(ball);
+    scene.appendChild(wrapper);
 
-            prepareNextItem(); // Update Top UI for next turn immediately
+    prepareNextItem();
 
-            const startPos = new THREE.Vector3();
-            cam.object3D.getWorldPosition(startPos);
-            const direction = new THREE.Vector3(0, 0, -1);
-            direction.applyQuaternion(cam.object3D.quaternion);
+    const startPos = new THREE.Vector3();
+    cam.object3D.getWorldPosition(startPos);
+    const direction = new THREE.Vector3(0, 0, -1);
+    direction.applyQuaternion(cam.object3D.quaternion);
 
-            const sideVector = new THREE.Vector3(1, 0, 0);
-            sideVector.applyQuaternion(cam.object3D.quaternion);
-            direction.addScaledVector(sideVector, tilt * 2.5); 
+    const sideVector = new THREE.Vector3(1, 0, 0);
+    sideVector.applyQuaternion(cam.object3D.quaternion);
+    
+    // Horizontal direction based on swipe tilt
+    direction.addScaledVector(sideVector, tilt * 3); 
 
-            const endPos = {
-                x: startPos.x + direction.x * 8,
-                y: -1.5,
-                z: startPos.z + direction.z * 8
-            };
+    // Initial spawn slightly in front and below eye-level
+    wrapper.setAttribute('position', {
+        x: startPos.x + direction.x * 0.5,
+        y: startPos.y - 0.2,
+        z: startPos.z + direction.z * 0.5
+    });
 
-            wrapper.setAttribute('animation', { 
-                property: 'position', 
-                to: `${endPos.x} ${endPos.y} ${endPos.z}`, 
-                dur: 800, 
-                easing: 'easeOutQuad' 
-            });
+    const travelDistance = 8;
+    const endPos = {
+        x: startPos.x + direction.x * travelDistance,
+        y: -1.5, // Floor level
+        z: startPos.z + direction.z * travelDistance
+    };
 
-            setTimeout(() => {
-                const buckets = ['basket-sap', 'basket-not-sap'];
-                let hitResult = null;
+    // 1. FORWARD MOVEMENT (Wrapper)
+    wrapper.setAttribute('animation', {
+        property: 'position',
+        to: `${endPos.x} ${endPos.y} ${endPos.z}`,
+        dur: 1100,
+        easing: 'linear'
+    });
 
-                buckets.forEach(id => {
-                    const bucket = document.getElementById(id);
-                    const bPos = bucket.object3D.position;
-                    const dist = Math.sqrt(Math.pow(endPos.x - bPos.x, 2) + Math.pow(endPos.z - bPos.z, 2));
+    // 2. THE TOSS ARC (Ball inside Wrapper)
+    // Rise up
+    ball.setAttribute('animation__up', {
+        property: 'position',
+        from: '0 0 0',
+        to: '0 2.2 0', // Height of the toss
+        dur: 450,
+        easing: 'easeOutQuad'
+    });
 
-                    if (dist < 1.0) {
-                        hitResult = (id === itemBeingThrown.target);
-                        if (hitResult) {
-                            score += 10;
-                            wiggleBucket(bucket, true);
-                        } else {
-                            score -= 5;
-                            wiggleBucket(bucket, false);
-                        }
-                        document.getElementById('score-val').innerText = score;
-                    }
-                });
-                if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
-            }, 850);
-        }
+    // Fall down
+    setTimeout(() => {
+        ball.setAttribute('animation__down', {
+            property: 'position',
+            to: '0 0 0',
+            dur: 650,
+            easing: 'easeInQuad'
+        });
+    }, 450);
+
+    // 3. COLLISION CHECK (Wait for the fall to complete)
+    setTimeout(() => {
+        const buckets = ['basket-sap', 'basket-not-sap'];
+        buckets.forEach(id => {
+            const bucket = document.getElementById(id);
+            const bPos = bucket.object3D.position;
+            
+            // Check distance at the landing coordinate
+            const dist = Math.sqrt(
+                Math.pow(endPos.x - bPos.x, 2) + 
+                Math.pow(endPos.z - bPos.z, 2)
+            );
+
+            if (dist < 0.85) { // Radius of "entry"
+                if (id === itemBeingThrown.target) {
+                    score += 10;
+                    wiggleBucket(bucket, true);
+                } else {
+                    score -= 5;
+                    wiggleBucket(bucket, false);
+                }
+                document.getElementById('score-val').innerText = score;
+            }
+        });
+
+        if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+    }, 1150);
+}
 
         function wiggleBucket(entity, isCorrect) {
             // Screen Flash
