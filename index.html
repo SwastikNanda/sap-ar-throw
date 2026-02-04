@@ -71,12 +71,28 @@
                 opacity: 0;
             }
         }
+
+        .swoosh {
+            animation: swoosh-animation 0.4s ease-out forwards;
+        }
+
+        @keyframes swoosh-animation {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 
 <body>
 
     <div id="flash-overlay"></div>
+    <div id="swipe-indicator"></div>
 
     <div id="instruction-overlay">
         <div id="swipe-animation">
@@ -197,18 +213,6 @@
             prepareNextItem();
             startTimer();
         }
-
-        document.addEventListener('instructions-done', () => {
-            score = 0;
-            timeLeft = config.timerSeconds;
-            gameActive = true;
-            canThrow = true;
-            document.getElementById('score-val').innerText = "0";
-            document.getElementById('time-val').innerText = timeLeft;
-            document.getElementById('time-val').style.color = "white";
-            prepareNextItem();
-            startTimer();
-        });
 
         function startTimer() {
             timerInterval = setInterval(() => {
